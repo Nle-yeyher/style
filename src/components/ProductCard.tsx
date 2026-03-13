@@ -21,8 +21,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     addToCart(product);
     toast({
-      title: "Added to cart",
-      description: `${product.name} is now in your shopping bag.`,
+      title: "Añadido a la bolsa",
+      description: `${product.name} ya está en tu carrito.`,
     });
   };
 
@@ -42,7 +42,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-4 w-4" />
-              Quick Add
+              Agregar rápido
             </Button>
           </div>
         </div>

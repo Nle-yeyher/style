@@ -25,10 +25,10 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <Link href="/" className="transition-colors hover:text-primary">Shop</Link>
-          <Link href="/orders" className="transition-colors hover:text-primary">Orders</Link>
-          <Link href="#" className="transition-colors hover:text-primary">Collections</Link>
-          <Link href="#" className="transition-colors hover:text-primary">About</Link>
+          <Link href="/" className="transition-colors hover:text-primary">Tienda</Link>
+          <Link href="/orders" className="transition-colors hover:text-primary">Pedidos</Link>
+          <Link href="#" className="transition-colors hover:text-primary">Colecciones</Link>
+          <Link href="#" className="transition-colors hover:text-primary">Nosotros</Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Shopping Cart</SheetTitle>
+                <SheetTitle>Bolsa de Compra</SheetTitle>
               </SheetHeader>
               <CartSheetContent />
             </SheetContent>

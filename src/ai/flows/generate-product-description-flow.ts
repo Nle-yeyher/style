@@ -1,24 +1,25 @@
+
 'use server';
 /**
- * @fileOverview A Genkit flow to automatically generate detailed, engaging, and SEO-friendly product descriptions.
+ * @fileOverview Un flujo de Genkit para generar descripciones de productos detalladas, atractivas y optimizadas para SEO en español.
  *
- * - generateProductDescription - A function that handles the product description generation process.
- * - GenerateProductDescriptionInput - The input type for the generateProductDescription function.
- * - GenerateProductDescriptionOutput - The return type for the generateProductDescription function.
+ * - generateProductDescription - Función que maneja el proceso de generación de descripciones.
+ * - GenerateProductDescriptionInput - Tipo de entrada para la función.
+ * - GenerateProductDescriptionOutput - Tipo de salida para la función.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const GenerateProductDescriptionInputSchema = z.object({
-  name: z.string().describe('The name of the product.'),
-  category: z.string().describe('The category of the product (e.g., "Outerwear", "Dresses").'),
-  attributes: z.string().describe('A JSON string representing key-value pairs of product attributes (e.g., "{ \"material\": \"Cotton\", \"style\": \"Casual\" }").'),
+  name: z.string().describe('El nombre del producto.'),
+  category: z.string().describe('La categoría del producto (ej: "Abrigos", "Vestidos").'),
+  attributes: z.string().describe('Un string JSON que representa pares clave-valor de atributos (ej: "{ \"material\": \"Algodón\", \"estilo\": \"Casual\" }").'),
 });
 export type GenerateProductDescriptionInput = z.infer<typeof GenerateProductDescriptionInputSchema>;
 
 const GenerateProductDescriptionOutputSchema = z.object({
-  description: z.string().describe('A detailed, engaging, and SEO-friendly product description.'),
+  description: z.string().describe('Una descripción del producto detallada, atractiva y optimizada para SEO en español.'),
 });
 export type GenerateProductDescriptionOutput = z.infer<typeof GenerateProductDescriptionOutputSchema>;
 
@@ -30,17 +31,17 @@ const productDescriptionPrompt = ai.definePrompt({
   name: 'productDescriptionPrompt',
   input: { schema: GenerateProductDescriptionInputSchema },
   output: { schema: GenerateProductDescriptionOutputSchema },
-  prompt: `You are an expert copywriter specializing in e-commerce product descriptions. Your task is to create a detailed, engaging, and SEO-friendly product description based on the provided product information.
+  prompt: `Eres un redactor experto especializado en descripciones de productos de comercio electrónico. Tu tarea es crear una descripción detallada, atractiva y optimizada para SEO en ESPAÑOL basada en la información proporcionada.
 
-Focus on highlighting key features, benefits, and appeal to the target audience. Incorporate keywords naturally for SEO.
+Céntrate en destacar las características clave, los beneficios y el atractivo para el público objetivo. Incorpora palabras clave de forma natural.
 
-Product Name: {{{name}}}
-Category: {{{category}}}
-Attributes (JSON string): {{{attributes}}}
+Nombre del Producto: {{{name}}}
+Categoría: {{{category}}}
+Atributos (JSON): {{{attributes}}}
 
 ---
 
-Generate the product description in a maximum of 200 words, using a persuasive and evocative tone. Start with an engaging hook and conclude with a call to action or a statement about its value.`, 
+Genera la descripción en ESPAÑOL con un máximo de 200 palabras, usando un tono persuasivo y evocador. Empieza con un gancho atractivo y concluye con una llamada a la acción o una declaración de valor.`, 
   config: {
     temperature: 0.7,
   },

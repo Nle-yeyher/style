@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,8 +17,8 @@ export function CartSheetContent() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
         <ShoppingBag className="h-12 w-12 text-muted-foreground opacity-20" />
-        <p className="text-muted-foreground">Your cart is currently empty.</p>
-        <Button onClick={() => router.push('/')} variant="outline">Start Shopping</Button>
+        <p className="text-muted-foreground">Tu bolsa está vacía actualmente.</p>
+        <Button onClick={() => router.push('/')} variant="outline">Empezar a comprar</Button>
       </div>
     );
   }
@@ -83,11 +83,9 @@ export function CartSheetContent() {
           <span>${total.toFixed(2)}</span>
         </div>
         <Button className="w-full bg-primary" onClick={() => router.push('/checkout')}>
-          Checkout Now
+          Tramitar Pedido
         </Button>
       </div>
     </div>
   );
 }
-
-import { ShoppingBag } from 'lucide-react';

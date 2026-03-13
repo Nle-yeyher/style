@@ -17,8 +17,8 @@ export default function CheckoutPage() {
   if (cart.length === 0) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold">Your bag is empty</h2>
-        <Button onClick={() => router.push('/')}>Return to Shop</Button>
+        <h2 className="text-2xl font-bold">Tu bolsa está vacía</h2>
+        <Button onClick={() => router.push('/')}>Volver a la tienda</Button>
       </div>
     );
   }
@@ -27,7 +27,6 @@ export default function CheckoutPage() {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment gateway interaction (Mercado Pago / Wompi)
     setTimeout(() => {
       setIsProcessing(false);
       clearCart();
@@ -37,41 +36,41 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-12">
-      <h1 className="text-3xl font-bold font-headline">Secure Checkout</h1>
+      <h1 className="text-3xl font-bold font-headline">Pago Seguro</h1>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
         <div className="space-y-8">
           <form onSubmit={handleCheckout} className="space-y-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-bold">Shipping Details</h3>
+              <h3 className="text-lg font-bold">Detalles de Envío</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" required />
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <Input id="firstName" placeholder="Juan" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" required />
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <Input id="lastName" placeholder="Pérez" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" required />
+                <Label htmlFor="email">Correo Electrónico</Label>
+                <Input id="email" type="email" placeholder="juan@ejemplo.com" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" required />
+                <Label htmlFor="address">Dirección</Label>
+                <Input id="address" placeholder="Calle 123 #45-67" required />
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-bold">Payment Method</h3>
+              <h3 className="text-lg font-bold">Método de Pago</h3>
               <div className="rounded-xl border p-4">
                 <div className="flex items-center gap-4">
                   <CreditCard className="h-6 w-6 text-primary" />
                   <div className="flex-1">
-                    <p className="text-sm font-bold">Credit Card</p>
-                    <p className="text-xs text-muted-foreground">Secure payment powered by Mercado Pago</p>
+                    <p className="text-sm font-bold">Tarjeta de Crédito</p>
+                    <p className="text-xs text-muted-foreground">Pago seguro procesado por Mercado Pago</p>
                   </div>
                 </div>
               </div>
@@ -81,22 +80,22 @@ export default function CheckoutPage() {
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing Payment...
+                  Procesando Pago...
                 </>
               ) : (
-                <>Pay ${total.toFixed(2)} Now</>
+                <>Pagar ${total.toFixed(2)} ahora</>
               )}
             </Button>
             
             <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-green-500" />
-              Your payment information is encrypted and secure.
+              Tu información de pago está cifrada y segura.
             </p>
           </form>
         </div>
 
         <div className="rounded-2xl bg-muted/50 p-8">
-          <h3 className="mb-6 text-lg font-bold">Order Summary</h3>
+          <h3 className="mb-6 text-lg font-bold">Resumen del Pedido</h3>
           <div className="space-y-4">
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">

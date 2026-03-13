@@ -6,8 +6,8 @@ import { CartProvider } from '@/hooks/use-cart';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'StyleSavvy | Modern Minimalism in Clothing',
-  description: 'Elevate your wardrobe with minimalist, clean-cut fashion pieces.',
+  title: 'StyleSavvy | Minimalismo Moderno en Ropa',
+  description: 'Eleva tu armario con piezas de moda minimalistas y de corte limpio.',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
