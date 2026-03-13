@@ -10,11 +10,21 @@ import { useRouter } from 'next/navigation';
 import { Loader2, CreditCard, ShieldCheck, Landmark, Wallet } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
+import { generateInvoice } from '@/ai/flows/generate-invoice-flow';
+import { saveOrder } from '@/lib/store';
 
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    address: '',
+    city: '',
+    zip: ''
+  });
   const router = useRouter();
 
   if (cart.length === 0) {
@@ -26,16 +36,59 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulación de procesamiento de pago
-    setTimeout(() => {
+    try {
+      const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+      
+      // Generar factura con IA
+      const invoice = await generateInvoice({
+        orderNumber: `SS-${orderNumber}`,
+        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerEmail: formData.email,
+        items: cart.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        total: total,
+        date: new Date().toLocaleDateString('es-AR')
+      });
+
+      // Guardar pedido localmente
+      saveOrder({
+        id: `SS-${orderNumber}`,
+        date: new Date().toISOString(),
+        total: total,
+        status: 'completed',
+        items: cart.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        }))
+      });
+
+      // Simular retraso de procesamiento y envío de email
+      setTimeout(() => {
+        setIsProcessing(false);
+        clearCart();
+        // Guardar la factura en sessionStorage para mostrarla en la página de éxito
+        sessionStorage.setItem('last_invoice', JSON.stringify(invoice));
+        sessionStorage.setItem('customer_email', formData.email);
+        router.push(`/checkout/success?order=${orderNumber}`);
+      }, 2000);
+    } catch (error) {
+      console.error("Error en el checkout:", error);
       setIsProcessing(false);
-      clearCart();
-      router.push('/checkout/success');
-    }, 2500);
+    }
   };
 
   return (
@@ -58,27 +111,27 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nombre</Label>
-                  <Input id="firstName" placeholder="Juan" required />
+                  <Input id="firstName" placeholder="Juan" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Apellido</Label>
-                  <Input id="lastName" placeholder="Pérez" required />
+                  <Input id="lastName" placeholder="Pérez" required onChange={handleInputChange} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
                   <Label htmlFor="email">Correo Electrónico</Label>
-                  <Input id="email" type="email" placeholder="juan@ejemplo.com" required />
+                  <Input id="email" type="email" placeholder="juan@ejemplo.com" required onChange={handleInputChange} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
                   <Label htmlFor="address">Dirección Completa</Label>
-                  <Input id="address" placeholder="Calle 123 #45-67, Depto 4B" required />
+                  <Input id="address" placeholder="Calle 123 #45-67, Depto 4B" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Ciudad</Label>
-                  <Input id="city" placeholder="Buenos Aires" required />
+                  <Input id="city" placeholder="Buenos Aires" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zip">Código Postal</Label>
-                  <Input id="zip" placeholder="C1425" required />
+                  <Input id="zip" placeholder="C1425" required onChange={handleInputChange} />
                 </div>
               </div>
             </section>
@@ -160,18 +213,6 @@ export default function CheckoutPage() {
                   </CardContent>
                 </Card>
               )}
-
-              {paymentMethod === 'transfer' && (
-                <div className="rounded-xl border border-dashed p-6 text-center">
-                  <p className="text-sm text-muted-foreground">Te enviaremos los datos del CBU/Alias al finalizar el pedido para que realices la transferencia.</p>
-                </div>
-              )}
-
-              {paymentMethod === 'wallet' && (
-                <div className="rounded-xl border border-dashed p-6 text-center">
-                  <p className="text-sm text-muted-foreground">Serás redirigido a la plataforma de pago una vez que confirmes el pedido.</p>
-                </div>
-              )}
             </section>
 
             <Button 
@@ -182,16 +223,16 @@ export default function CheckoutPage() {
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Procesando Pago Seguro...
+                  Generando Factura y Enviando Correo...
                 </>
               ) : (
-                <>Pagar ${total.toFixed(2)} ahora</>
+                <>Finalizar Pago ${total.toFixed(2)}</>
               )}
             </Button>
             
             <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-green-500" />
-              Tu transacción está protegida por encriptación SSL de 256 bits.
+              Tu transacción está protegida y se enviará una factura a tu email.
             </p>
           </form>
         </div>
@@ -227,7 +268,6 @@ export default function CheckoutPage() {
                         <span className="text-base font-bold">Total</span>
                         <div className="text-right">
                           <span className="block text-2xl font-bold text-primary">${total.toFixed(2)}</span>
-                          <span className="text-[10px] text-muted-foreground">Impuestos incluidos</span>
                         </div>
                       </div>
                     </div>
@@ -235,12 +275,6 @@ export default function CheckoutPage() {
                 </div>
               </CardContent>
             </Card>
-
-            <div className="rounded-xl bg-accent/10 p-4">
-              <p className="text-xs font-medium text-accent-foreground text-center">
-                🎁 ¡Tu pedido califica para un regalo sorpresa exclusivo!
-              </p>
-            </div>
           </div>
         </div>
       </div>
