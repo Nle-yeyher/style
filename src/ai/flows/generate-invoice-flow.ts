@@ -41,11 +41,11 @@ Detalles del Pedido:
 Número de Orden: {{{orderNumber}}}
 Cliente: {{{customerName}}} ({{{customerEmail}}})
 Fecha: {{{date}}}
-Total: ${{{total}}}
+Total: \${{{total}}}
 
 Productos:
 {{#each items}}
-- {{{this.name}}} x{{{this.quantity}}}: ${{{this.price}}} c/u
+- {{{this.name}}} x{{{this.quantity}}}: \${{{this.price}}} c/u
 {{/each}}
 
 Genera:
