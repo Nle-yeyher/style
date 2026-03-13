@@ -43,7 +43,7 @@ export default function Navbar() {
         <div className="hidden items-center gap-8 text-sm font-medium md:flex">
           <Link href="/" className="transition-colors hover:text-primary">Tienda</Link>
           <Link href="/orders" className="transition-colors hover:text-primary">Pedidos</Link>
-          <Link href="#" className="transition-colors hover:text-primary">Colecciones</Link>
+          <Link href="/collections" className="transition-colors hover:text-primary">Colecciones</Link>
           <Link href="#" className="transition-colors hover:text-primary">Nosotros</Link>
         </div>
 
