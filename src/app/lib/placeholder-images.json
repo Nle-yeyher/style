@@ -1,0 +1,53 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "p1",
+      "description": "Minimalist cotton t-shirt in muted blue",
+      "imageUrl": "https://picsum.photos/seed/style1/600/800",
+      "imageHint": "clothing t-shirt"
+    },
+    {
+      "id": "p2",
+      "description": "Classic denim jacket with vintage wash",
+      "imageUrl": "https://picsum.photos/seed/style2/600/800",
+      "imageHint": "denim jacket"
+    },
+    {
+      "id": "p3",
+      "description": "Slim-fit linen trousers in beige",
+      "imageUrl": "https://picsum.photos/seed/style3/600/800",
+      "imageHint": "linen trousers"
+    },
+    {
+      "id": "p4",
+      "description": "Tailored wool blazer in charcoal gray",
+      "imageUrl": "https://picsum.photos/seed/style4/600/800",
+      "imageHint": "wool blazer"
+    },
+    {
+      "id": "p5",
+      "description": "Premium leather boots in mahogany",
+      "imageUrl": "https://picsum.photos/seed/style5/600/800",
+      "imageHint": "leather boots"
+    },
+    {
+      "id": "p6",
+      "description": "Modern canvas backpack with leather straps",
+      "imageUrl": "https://picsum.photos/seed/style6/600/800",
+      "imageHint": "canvas backpack"
+    },
+    {
+      "id": "p7",
+      "description": "Lightweight knitted sweater in cream",
+      "imageUrl": "https://picsum.photos/seed/style7/600/800",
+      "imageHint": "knitted sweater"
+    },
+    {
+      "id": "p8",
+      "description": "Silk floral midi dress",
+      "imageUrl": "https://picsum.photos/seed/style8/600/800",
+      "imageHint": "floral dress"
+    }
+  ]
+}
