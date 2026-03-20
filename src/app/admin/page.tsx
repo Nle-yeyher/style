@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveProduct = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!db) return;
 
@@ -44,36 +44,34 @@ export default function AdminDashboard() {
       updatedAt: serverTimestamp(),
     };
 
-    try {
-      if (editingProduct?.id) {
-        const productRef = doc(db, 'products', editingProduct.id);
-        await updateDoc(productRef, productData);
-        toast({ title: "Producto actualizado", description: "Los cambios se guardaron correctamente." });
-      } else {
-        await addDoc(collection(db, 'products'), {
-          ...productData,
-          createdAt: serverTimestamp(),
-        });
-        toast({ title: "Producto creado", description: "El nuevo producto ya está en el catálogo." });
-      }
-      setIsDialogOpen(false);
-      setEditingProduct(null);
-    } catch (error) {
-      console.error("Error saving product:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
-    } finally {
-      setIsSubmitting(false);
-    }
+    const mutationPromise = editingProduct?.id 
+      ? updateDoc(doc(db, 'products', editingProduct.id), productData)
+      : addDoc(collection(db, 'products'), { ...productData, createdAt: serverTimestamp() });
+
+    mutationPromise
+      .then(() => {
+        toast({ title: editingProduct?.id ? "Producto actualizado" : "Producto creado" });
+        setIsDialogOpen(false);
+        setEditingProduct(null);
+      })
+      .catch((error) => {
+        console.error("Error saving product:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
-  const handleDeleteProduct = async (id: string) => {
+  const handleDeleteProduct = (id: string) => {
     if (!db || !confirm("¿Estás seguro de eliminar este producto?")) return;
-    try {
-      await deleteDoc(doc(db, 'products', id));
-      toast({ title: "Producto eliminado", description: "El producto ha sido quitado del catálogo." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
-    }
+    deleteDoc(doc(db, 'products', id))
+      .then(() => {
+        toast({ title: "Producto eliminado" });
+      })
+      .catch((error) => {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
+      });
   };
 
   if (loading) {
