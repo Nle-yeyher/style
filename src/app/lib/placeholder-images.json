@@ -3,51 +3,63 @@
   "placeholderImages": [
     {
       "id": "p1",
-      "description": "Minimalist cotton t-shirt in muted blue",
+      "description": "Camiseta de algodón minimalista en azul suave",
       "imageUrl": "https://picsum.photos/seed/style1/600/800",
-      "imageHint": "clothing t-shirt"
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p2",
-      "description": "Classic denim jacket with vintage wash",
+      "description": "Chaqueta vaquera clásica con lavado vintage",
       "imageUrl": "https://picsum.photos/seed/style2/600/800",
-      "imageHint": "denim jacket"
+      "imageHint": "denim Abrigos"
     },
     {
       "id": "p3",
-      "description": "Slim-fit linen trousers in beige",
+      "description": "Pantalones de lino de corte ajustado en beige",
       "imageUrl": "https://picsum.photos/seed/style3/600/800",
-      "imageHint": "linen trousers"
+      "imageHint": "linen Pantalones"
     },
     {
       "id": "p4",
-      "description": "Tailored wool blazer in charcoal gray",
+      "description": "Blazer de lana entallado en gris marengo",
       "imageUrl": "https://picsum.photos/seed/style4/600/800",
-      "imageHint": "wool blazer"
+      "imageHint": "wool Abrigos"
     },
     {
       "id": "p5",
-      "description": "Premium leather boots in mahogany",
+      "description": "Botas de cuero premium en color caoba",
       "imageUrl": "https://picsum.photos/seed/style5/600/800",
-      "imageHint": "leather boots"
+      "imageHint": "leather Calzado"
     },
     {
       "id": "p6",
-      "description": "Modern canvas backpack with leather straps",
+      "description": "Mochila de lona moderna con correas de cuero",
       "imageUrl": "https://picsum.photos/seed/style6/600/800",
-      "imageHint": "canvas backpack"
+      "imageHint": "canvas Accesorios"
     },
     {
       "id": "p7",
-      "description": "Lightweight knitted sweater in cream",
+      "description": "Suéter de punto ligero en color crema",
       "imageUrl": "https://picsum.photos/seed/style7/600/800",
-      "imageHint": "knitted sweater"
+      "imageHint": "knitted Abrigos"
     },
     {
       "id": "p8",
-      "description": "Silk floral midi dress",
+      "description": "Vestido midi floral de seda",
       "imageUrl": "https://picsum.photos/seed/style8/600/800",
-      "imageHint": "floral dress"
+      "imageHint": "floral Vestidos"
+    },
+    {
+      "id": "p9",
+      "description": "Gorra de béisbol de pana",
+      "imageUrl": "https://picsum.photos/seed/style9/600/800",
+      "imageHint": "corduroy Accesorios"
+    },
+    {
+      "id": "p10",
+      "description": "Zapatos Oxford clásicos",
+      "imageUrl": "https://picsum.photos/seed/style10/600/800",
+      "imageHint": "classic Calzado"
     }
   ]
 }
