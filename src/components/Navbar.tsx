@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -44,7 +43,7 @@ export default function Navbar() {
           <Link href="/" className="transition-colors hover:text-primary">Tienda</Link>
           <Link href="/orders" className="transition-colors hover:text-primary">Pedidos</Link>
           <Link href="/collections" className="transition-colors hover:text-primary">Colecciones</Link>
-          <Link href="#" className="transition-colors hover:text-primary">Nosotros</Link>
+          <Link href="/about" className="transition-colors hover:text-primary">Nosotros</Link>
         </div>
 
         <div className="flex items-center gap-2">
