@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, Menu, X } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -41,9 +42,11 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-8 text-sm font-medium md:flex">
           <Link href="/" className="transition-colors hover:text-primary">Tienda</Link>
-          <Link href="/orders" className="transition-colors hover:text-primary">Pedidos</Link>
           <Link href="/collections" className="transition-colors hover:text-primary">Colecciones</Link>
           <Link href="/about" className="transition-colors hover:text-primary">Nosotros</Link>
+          <Link href="/admin" className="flex items-center gap-1.5 transition-colors hover:text-primary text-muted-foreground">
+            <UserCog className="h-4 w-4" /> Admin
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">

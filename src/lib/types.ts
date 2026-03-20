@@ -8,6 +8,7 @@ export interface Product {
   imageUrl: string;
   category: string;
   suggestions_ids: string[];
+  createdAt?: any;
 }
 
 export interface OrderItem {
