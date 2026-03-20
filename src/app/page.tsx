@@ -1,8 +1,18 @@
 
-import { products } from '@/lib/store';
+"use client";
+
+import { useFirestore, useCollection } from '@/firebase';
+import { collection } from 'firebase/firestore';
 import ProductCard from '@/components/ProductCard';
+import { Loader2 } from 'lucide-react';
+import { Product } from '@/lib/types';
 
 export default function Home() {
+  const db = useFirestore();
+  const { data: products, loading } = useCollection<Product>(
+    db ? collection(db, 'products') : null
+  );
+
   return (
     <div className="space-y-12">
       <section className="relative overflow-hidden rounded-3xl bg-primary py-24 text-white">
@@ -37,11 +47,17 @@ export default function Home() {
           <button className="text-sm font-bold text-primary hover:underline">Ver Todo</button>
         </div>
         
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex h-40 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
       
       <section className="rounded-3xl bg-muted py-20">
