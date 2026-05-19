@@ -1,65 +1,652 @@
-
 {
   "placeholderImages": [
     {
       "id": "p1",
       "description": "Camiseta de algodón minimalista en azul suave",
-      "imageUrl": "https://picsum.photos/seed/style1/600/800",
+      "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop",
       "imageHint": "clothing Camisetas"
     },
     {
       "id": "p2",
-      "description": "Chaqueta vaquera clásica con lavado vintage",
-      "imageUrl": "https://picsum.photos/seed/style2/600/800",
-      "imageHint": "denim Abrigos"
+      "description": "Camiseta básica blanca de algodón orgánico",
+      "imageUrl": "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p3",
-      "description": "Pantalones de lino de corte ajustado en beige",
-      "imageUrl": "https://picsum.photos/seed/style3/600/800",
-      "imageHint": "linen Pantalones"
+      "description": "Camiseta oversize gris con bolsillo frontal",
+      "imageUrl": "https://images.unsplash.com/photo-1618354691438-25bc04584c23?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p4",
-      "description": "Blazer de lana entallado en gris marengo",
-      "imageUrl": "https://picsum.photos/seed/style4/600/800",
-      "imageHint": "wool Abrigos"
+      "description": "Camiseta de rayas marineras azul y blanco",
+      "imageUrl": "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p5",
-      "description": "Botas de cuero premium en color caoba",
-      "imageUrl": "https://picsum.photos/seed/style5/600/800",
-      "imageHint": "leather Calzado"
+      "description": "Camiseta negra de cuello redondo slim fit",
+      "imageUrl": "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p6",
-      "description": "Mochila de lona moderna con correas de cuero",
-      "imageUrl": "https://picsum.photos/seed/style6/600/800",
-      "imageHint": "canvas Accesorios"
+      "description": "Camiseta verde oliva con estampado gráfico",
+      "imageUrl": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p7",
-      "description": "Suéter de punto ligero en color crema",
-      "imageUrl": "https://picsum.photos/seed/style7/600/800",
-      "imageHint": "knitted Abrigos"
+      "description": "Camiseta polo de algodón piqué en blanco",
+      "imageUrl": "https://images.unsplash.com/photo-1622445275576-721325763afe?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p8",
-      "description": "Vestido midi floral de seda",
-      "imageUrl": "https://picsum.photos/seed/style8/600/800",
-      "imageHint": "floral Vestidos"
+      "description": "Camiseta tie-dye multicolor estilo casual",
+      "imageUrl": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p9",
-      "description": "Gorra de béisbol de pana",
-      "imageUrl": "https://picsum.photos/seed/style9/600/800",
-      "imageHint": "corduroy Accesorios"
+      "description": "Camiseta de lino en color arena manga corta",
+      "imageUrl": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
     },
     {
       "id": "p10",
-      "description": "Zapatos Oxford clásicos",
-      "imageUrl": "https://picsum.photos/seed/style10/600/800",
-      "imageHint": "classic Calzado"
+      "description": "Camiseta crop top rosa pastel mujer",
+      "imageUrl": "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
+    },
+    {
+      "id": "p11",
+      "description": "Camiseta de tirantes deportiva en negro",
+      "imageUrl": "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
+    },
+    {
+      "id": "p12",
+      "description": "Camiseta con bolsillo de canguro estilo universitario",
+      "imageUrl": "https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=600&h=800&fit=crop",
+      "imageHint": "clothing Camisetas"
+    },
+    {
+      "id": "p13",
+      "description": "Chaqueta vaquera clásica con lavado vintage",
+      "imageUrl": "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=600&h=800&fit=crop",
+      "imageHint": "denim Abrigos"
+    },
+    {
+      "id": "p14",
+      "description": "Chaqueta denim azul oscuro desgastada",
+      "imageUrl": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&h=800&fit=crop",
+      "imageHint": "denim Abrigos"
+    },
+    {
+      "id": "p15",
+      "description": "Abrigo largo de lana camel con cinturón",
+      "imageUrl": "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?w=600&h=800&fit=crop",
+      "imageHint": "wool Abrigos"
+    },
+    {
+      "id": "p16",
+      "description": "Blazer de lana entallado en gris marengo",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
+      "imageHint": "wool Abrigos"
+    },
+    {
+      "id": "p17",
+      "description": "Suéter de punto ligero en color crema",
+      "imageUrl": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600&h=800&fit=crop",
+      "imageHint": "knitted Abrigos"
+    },
+    {
+      "id": "p18",
+      "description": "Suéter oversize de lana merino en verde musgo",
+      "imageUrl": "https://images.unsplash.com/photo-1608234808654-2a8875faa7fd?w=600&h=800&fit=crop",
+      "imageHint": "knitted Abrigos"
+    },
+    {
+      "id": "p19",
+      "description": "Parka impermeable con capucha en azul marino",
+      "imageUrl": "https://images.unsplash.com/photo-1544923246-77307dd654cb?w=600&h=800&fit=crop",
+      "imageHint": "waterproof Abrigos"
+    },
+    {
+      "id": "p20",
+      "description": "Chaqueta bomber de nylon en negro brillante",
+      "imageUrl": "https://images.unsplash.com/photo-1548126032-079a0fb0099d?w=600&h=800&fit=crop",
+      "imageHint": "bomber Abrigos"
+    },
+    {
+      "id": "p21",
+      "description": "Gabardina clásica impermeable en beige",
+      "imageUrl": "https://images.unsplash.com/photo-1520975954732-35dd22299614?w=600&h=800&fit=crop",
+      "imageHint": "trench Abrigos"
+    },
+    {
+      "id": "p22",
+      "description": "Chaleco acolchado de plumón en negro",
+      "imageUrl": "https://images.unsplash.com/photo-1517438476312-10d79c077509?w=600&h=800&fit=crop",
+      "imageHint": "puffer Abrigos"
+    },
+    {
+      "id": "p23",
+      "description": "Blazer casual de cuadros escoceses mujer",
+      "imageUrl": "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=800&fit=crop",
+      "imageHint": "plaid Abrigos"
+    },
+    {
+      "id": "p24",
+      "description": "Chaqueta de cuero negro moto slim fit",
+      "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&h=800&fit=crop",
+      "imageHint": "leather Abrigos"
+    },
+    {
+      "id": "p25",
+      "description": "Pantalones de lino de corte ajustado en beige",
+      "imageUrl": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&h=800&fit=crop",
+      "imageHint": "linen Pantalones"
+    },
+    {
+      "id": "p26",
+      "description": "Jeans skinny de tiro alto en azul medio",
+      "imageUrl": "https://images.unsplash.com/photo-1475178626620-a4d074967452?w=600&h=800&fit=crop",
+      "imageHint": "denim Pantalones"
+    },
+    {
+      "id": "p27",
+      "description": "Pantalones chinos slim en verde caqui",
+      "imageUrl": "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&h=800&fit=crop",
+      "imageHint": "chino Pantalones"
+    },
+    {
+      "id": "p28",
+      "description": "Pantalón de traje negro de corte recto",
+      "imageUrl": "https://images.unsplash.com/photo-1594938374182-a57485cf6620?w=600&h=800&fit=crop",
+      "imageHint": "formal Pantalones"
+    },
+    {
+      "id": "p29",
+      "description": "Jogger de algodón gris jaspeado con elástico",
+      "imageUrl": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=600&h=800&fit=crop",
+      "imageHint": "jogger Pantalones"
+    },
+    {
+      "id": "p30",
+      "description": "Pantalones cargo con múltiples bolsillos en caqui",
+      "imageUrl": "https://images.unsplash.com/photo-1517438322307-e67111335449?w=600&h=800&fit=crop",
+      "imageHint": "cargo Pantalones"
+    },
+    {
+      "id": "p31",
+      "description": "Shorts vaqueros cortos de verano",
+      "imageUrl": "https://images.unsplash.com/photo-1591195853828-11db59a44f43?w=600&h=800&fit=crop",
+      "imageHint": "denim Pantalones"
+    },
+    {
+      "id": "p32",
+      "description": "Leggings deportivos negros de cintura alta",
+      "imageUrl": "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&h=800&fit=crop",
+      "imageHint": "sports Pantalones"
+    },
+    {
+      "id": "p33",
+      "description": "Pantalón palazzo de gasa estampada floral",
+      "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=800&fit=crop",
+      "imageHint": "palazzo Pantalones"
+    },
+    {
+      "id": "p34",
+      "description": "Pantalones wide leg de tela satinada en blanco",
+      "imageUrl": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=800&fit=crop",
+      "imageHint": "wideleg Pantalones"
+    },
+    {
+      "id": "p35",
+      "description": "Pantalón de pana marrón de corte recto",
+      "imageUrl": "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=600&h=800&fit=crop",
+      "imageHint": "corduroy Pantalones"
+    },
+    {
+      "id": "p36",
+      "description": "Botas de cuero premium en color caoba",
+      "imageUrl": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&h=800&fit=crop",
+      "imageHint": "leather Calzado"
+    },
+    {
+      "id": "p37",
+      "description": "Zapatos Oxford clásicos en marrón oscuro",
+      "imageUrl": "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=600&h=800&fit=crop",
+      "imageHint": "oxford Calzado"
+    },
+    {
+      "id": "p38",
+      "description": "Zapatillas blancas minimalistas de cuero",
+      "imageUrl": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop",
+      "imageHint": "sneakers Calzado"
+    },
+    {
+      "id": "p39",
+      "description": "Sandalias de cuero planas en camel",
+      "imageUrl": "https://images.unsplash.com/photo-1562273138-f46be4ebdf33?w=600&h=800&fit=crop",
+      "imageHint": "sandals Calzado"
+    },
+    {
+      "id": "p40",
+      "description": "Tacones de aguja negros de punta fina",
+      "imageUrl": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&h=800&fit=crop",
+      "imageHint": "heels Calzado"
+    },
+    {
+      "id": "p41",
+      "description": "Mocasines de cuero marrón con borla",
+      "imageUrl": "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=600&h=800&fit=crop",
+      "imageHint": "loafers Calzado"
+    },
+    {
+      "id": "p42",
+      "description": "Zapatillas running con suela de goma blanca",
+      "imageUrl": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&h=800&fit=crop",
+      "imageHint": "running Calzado"
+    },
+    {
+      "id": "p43",
+      "description": "Botas chelsea de cuero negro elástico lateral",
+      "imageUrl": "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=600&h=800&fit=crop",
+      "imageHint": "chelsea Calzado"
+    },
+    {
+      "id": "p44",
+      "description": "Alpargatas de esparto con plataforma yute",
+      "imageUrl": "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=600&h=800&fit=crop",
+      "imageHint": "espadrilles Calzado"
+    },
+    {
+      "id": "p45",
+      "description": "Zapatillas de skate low top en gris",
+      "imageUrl": "https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&h=800&fit=crop",
+      "imageHint": "skate Calzado"
+    },
+    {
+      "id": "p46",
+      "description": "Botas de agua de goma en rojo brillante",
+      "imageUrl": "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=600&h=800&fit=crop",
+      "imageHint": "rain Calzado"
+    },
+    {
+      "id": "p47",
+      "description": "Mochila de lona moderna con correas de cuero",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=800&fit=crop",
+      "imageHint": "canvas Accesorios"
+    },
+    {
+      "id": "p48",
+      "description": "Gorra de béisbol de pana verde",
+      "imageUrl": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&h=800&fit=crop",
+      "imageHint": "cap Accesorios"
+    },
+    {
+      "id": "p49",
+      "description": "Bolso tote de cuero sintético en negro",
+      "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=800&fit=crop",
+      "imageHint": "tote Accesorios"
+    },
+    {
+      "id": "p50",
+      "description": "Cinturón de cuero marrón con hebilla dorada",
+      "imageUrl": "https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=600&h=800&fit=crop",
+      "imageHint": "belt Accesorios"
+    },
+    {
+      "id": "p51",
+      "description": "Bufanda de cachemir a cuadros en gris y rojo",
+      "imageUrl": "https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=600&h=800&fit=crop",
+      "imageHint": "scarf Accesorios"
+    },
+    {
+      "id": "p52",
+      "description": "Reloj minimalista de acero con correa cuero",
+      "imageUrl": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=800&fit=crop",
+      "imageHint": "watch Accesorios"
+    },
+    {
+      "id": "p53",
+      "description": "Gafas de sol ojo de gato en carey",
+      "imageUrl": "https://images.unsplash.com/photo-1577803645773-f96470509666?w=600&h=800&fit=crop",
+      "imageHint": "sunglasses Accesorios"
+    },
+    {
+      "id": "p54",
+      "description": "Sombrero de paja para verano estilo fedora",
+      "imageUrl": "https://images.unsplash.com/photo-1529958030586-3aae4ca485ff?w=600&h=800&fit=crop",
+      "imageHint": "hat Accesorios"
+    },
+    {
+      "id": "p55",
+      "description": "Cartera billetera de cuero slim bifold",
+      "imageUrl": "https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&h=800&fit=crop",
+      "imageHint": "wallet Accesorios"
+    },
+    {
+      "id": "p56",
+      "description": "Pañuelo de seda estampado geométrico",
+      "imageUrl": "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=600&h=800&fit=crop",
+      "imageHint": "silk Accesorios"
+    },
+    {
+      "id": "p57",
+      "description": "Collar de perlas artificiales minimalista",
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=800&fit=crop",
+      "imageHint": "necklace Accesorios"
+    },
+    {
+      "id": "p58",
+      "description": "Vestido midi floral de seda en tonos pastel",
+      "imageUrl": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&h=800&fit=crop",
+      "imageHint": "floral Vestidos"
+    },
+    {
+      "id": "p59",
+      "description": "Vestido negro de cóctel manga corta",
+      "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop",
+      "imageHint": "cocktail Vestidos"
+    },
+    {
+      "id": "p60",
+      "description": "Vestido maxi bohemio en terracota con bordados",
+      "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600&h=800&fit=crop",
+      "imageHint": "boho Vestidos"
+    },
+    {
+      "id": "p61",
+      "description": "Vestido de lino blanco corte recto verano",
+      "imageUrl": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600&h=800&fit=crop",
+      "imageHint": "linen Vestidos"
+    },
+    {
+      "id": "p62",
+      "description": "Vestido de noche largo en rojo con escote cruzado",
+      "imageUrl": "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=600&h=800&fit=crop",
+      "imageHint": "evening Vestidos"
+    },
+    {
+      "id": "p63",
+      "description": "Vestido camisero de cuadros vichy en azul",
+      "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&h=800&fit=crop",
+      "imageHint": "shirt Vestidos"
+    },
+    {
+      "id": "p64",
+      "description": "Vestido de punto acanalado ajustado en camel",
+      "imageUrl": "https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=600&h=800&fit=crop",
+      "imageHint": "knit Vestidos"
+    },
+    {
+      "id": "p65",
+      "description": "Vestido slip satinado color champán",
+      "imageUrl": "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&h=800&fit=crop",
+      "imageHint": "satin Vestidos"
+    },
+    {
+      "id": "p66",
+      "description": "Vestido wrap de algodón con estampado tropical",
+      "imageUrl": "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=600&h=800&fit=crop",
+      "imageHint": "tropical Vestidos"
+    },
+    {
+      "id": "p67",
+      "description": "Vestido mini de lentejuelas doradas para fiesta",
+      "imageUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=800&fit=crop",
+      "imageHint": "party Vestidos"
+    },
+    {
+      "id": "p68",
+      "description": "Vestido blazer oversize en gris claro",
+      "imageUrl": "https://images.unsplash.com/photo-1548454782-15b189d129ab?w=600&h=800&fit=crop",
+      "imageHint": "blazer Vestidos"
+    },
+    {
+      "id": "p69",
+      "description": "Camiseta deportiva de compresión en negro",
+      "imageUrl": "https://images.unsplash.com/photo-1539794830467-1f1755804d13?w=600&h=800&fit=crop",
+      "imageHint": "sport Deportiva"
+    },
+    {
+      "id": "p70",
+      "description": "Sudadera con capucha gris para entrenamiento",
+      "imageUrl": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
+      "imageHint": "hoodie Deportiva"
+    },
+    {
+      "id": "p71",
+      "description": "Shorts deportivos azul marino con bolsillos laterales",
+      "imageUrl": "https://images.unsplash.com/photo-1591384640699-9a85b800ab14?w=600&h=800&fit=crop",
+      "imageHint": "shorts Deportiva"
+    },
+    {
+      "id": "p72",
+      "description": "Top deportivo de yoga en verde menta",
+      "imageUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=800&fit=crop",
+      "imageHint": "yoga Deportiva"
+    },
+    {
+      "id": "p73",
+      "description": "Chaqueta cortavientos ultraligera para running",
+      "imageUrl": "https://images.unsplash.com/photo-1604176424472-9d7a4b4b5561?w=600&h=800&fit=crop",
+      "imageHint": "running Deportiva"
+    },
+    {
+      "id": "p74",
+      "description": "Mallas de ciclismo negras con badana",
+      "imageUrl": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=800&fit=crop",
+      "imageHint": "cycling Deportiva"
+    },
+    {
+      "id": "p75",
+      "description": "Camiseta técnica de tenis color blanco",
+      "imageUrl": "https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?w=600&h=800&fit=crop",
+      "imageHint": "tennis Deportiva"
+    },
+    {
+      "id": "p76",
+      "description": "Conjunto deportivo de dos piezas lila",
+      "imageUrl": "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&h=800&fit=crop",
+      "imageHint": "set Deportiva"
+    },
+    {
+      "id": "p77",
+      "description": "Calcetines deportivos antideslizantes pack 3",
+      "imageUrl": "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600&h=800&fit=crop",
+      "imageHint": "socks Deportiva"
+    },
+    {
+      "id": "p78",
+      "description": "Banda deportiva para el cabello en negro",
+      "imageUrl": "https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=600&h=800&fit=crop",
+      "imageHint": "band Deportiva"
+    },
+    {
+      "id": "p79",
+      "description": "Collar de oro minimalista con colgante luna",
+      "imageUrl": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=800&fit=crop",
+      "imageHint": "gold Joyería"
+    },
+    {
+      "id": "p80",
+      "description": "Pendientes de aro plateados medianos",
+      "imageUrl": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=800&fit=crop",
+      "imageHint": "earrings Joyería"
+    },
+    {
+      "id": "p81",
+      "description": "Pulsera de plata con charm corazón",
+      "imageUrl": "https://images.unsplash.com/photo-1573408301185-9519eb7369cb?w=600&h=800&fit=crop",
+      "imageHint": "bracelet Joyería"
+    },
+    {
+      "id": "p82",
+      "description": "Anillo de compromiso con piedra zirconia",
+      "imageUrl": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=800&fit=crop",
+      "imageHint": "ring Joyería"
+    },
+    {
+      "id": "p83",
+      "description": "Set de collar y pendientes de perlas",
+      "imageUrl": "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&h=800&fit=crop",
+      "imageHint": "pearls Joyería"
+    },
+    {
+      "id": "p84",
+      "description": "Brazalete rígido de oro rosa geométrico",
+      "imageUrl": "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&h=800&fit=crop",
+      "imageHint": "bangle Joyería"
+    },
+    {
+      "id": "p85",
+      "description": "Collar de cadena gruesa estilo street",
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=800&fit=crop",
+      "imageHint": "chain Joyería"
+    },
+    {
+      "id": "p86",
+      "description": "Pendientes colgantes con piedras turquesa",
+      "imageUrl": "https://images.unsplash.com/photo-1631980372591-f7fb06c0f9d0?w=600&h=800&fit=crop",
+      "imageHint": "turquoise Joyería"
+    },
+    {
+      "id": "p87",
+      "description": "Tobillera de plata delicada con estrella",
+      "imageUrl": "https://images.unsplash.com/photo-1603561596112-0a132b757442?w=600&h=800&fit=crop",
+      "imageHint": "anklet Joyería"
+    },
+    {
+      "id": "p88",
+      "description": "Broche vintage de esmalte floral dorado",
+      "imageUrl": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&h=800&fit=crop",
+      "imageHint": "brooch Joyería"
+    },
+    {
+      "id": "p89",
+      "description": "Bolso de mano clutch dorado para fiesta",
+      "imageUrl": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600&h=800&fit=crop",
+      "imageHint": "clutch Bolsos"
+    },
+    {
+      "id": "p90",
+      "description": "Bolso bandolera de cuero marrón pequeño",
+      "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=800&fit=crop",
+      "imageHint": "crossbody Bolsos"
+    },
+    {
+      "id": "p91",
+      "description": "Bolso shopper de lona beige oversize",
+      "imageUrl": "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=800&fit=crop",
+      "imageHint": "shopper Bolsos"
+    },
+    {
+      "id": "p92",
+      "description": "Maletín de cuero negro para portátil",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=800&fit=crop",
+      "imageHint": "briefcase Bolsos"
+    },
+    {
+      "id": "p93",
+      "description": "Bolso bucket de ante en color vino",
+      "imageUrl": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&h=800&fit=crop",
+      "imageHint": "bucket Bolsos"
+    },
+    {
+      "id": "p94",
+      "description": "Bolso mini de charol negro con cadena",
+      "imageUrl": "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=600&h=800&fit=crop",
+      "imageHint": "mini Bolsos"
+    },
+    {
+      "id": "p95",
+      "description": "Bolso de rafia trenzada para verano",
+      "imageUrl": "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop",
+      "imageHint": "raffia Bolsos"
+    },
+    {
+      "id": "p96",
+      "description": "Riñonera de nylon negra estilo urbano",
+      "imageUrl": "https://images.unsplash.com/photo-1581605405669-f94673a4f56a?w=600&h=800&fit=crop",
+      "imageHint": "fanny Bolsos"
+    },
+    {
+      "id": "p97",
+      "description": "Bolso de hombro de piel beige estructurado",
+      "imageUrl": "https://images.unsplash.com/photo-1590739989039-f7f2c0bb0685?w=600&h=800&fit=crop",
+      "imageHint": "shoulder Bolsos"
+    },
+    {
+      "id": "p98",
+      "description": "Bolso tote de cuero negro con asa larga",
+      "imageUrl": "https://images.unsplash.com/photo-1594938374182-a57485cf6620?w=600&h=800&fit=crop",
+      "imageHint": "tote Bolsos"
+    },
+    {
+      "id": "p99",
+      "description": "Traje de chaqueta negro clásico mujer",
+      "imageUrl": "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=800&fit=crop",
+      "imageHint": "suit Trajes"
+    },
+    {
+      "id": "p100",
+      "description": "Traje de dos piezas gris perla hombre",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
+      "imageHint": "suit Trajes"
+    },
+    {
+      "id": "p101",
+      "description": "Blazer de lino blanco para evento verano",
+      "imageUrl": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=800&fit=crop",
+      "imageHint": "blazer Trajes"
+    },
+    {
+      "id": "p102",
+      "description": "Traje de novia minimalista corte sirena",
+      "imageUrl": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600&h=800&fit=crop",
+      "imageHint": "wedding Trajes"
+    },
+    {
+      "id": "p103",
+      "description": "Traje de lino azul celeste hombre verano",
+      "imageUrl": "https://images.unsplash.com/photo-1600091166971-7f9faad6c498?w=600&h=800&fit=crop",
+      "imageHint": "linen Trajes"
+    },
+    {
+      "id": "p104",
+      "description": "Conjunto formal falda y blazer en burdeos",
+      "imageUrl": "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&h=800&fit=crop",
+      "imageHint": "formal Trajes"
+    },
+    {
+      "id": "p105",
+      "description": "Esmoquin negro con pajarita para gala",
+      "imageUrl": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&h=800&fit=crop",
+      "imageHint": "tuxedo Trajes"
+    },
+    {
+      "id": "p106",
+      "description": "Traje de cuadros principe de gales beige",
+      "imageUrl": "https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?w=600&h=800&fit=crop",
+      "imageHint": "plaid Trajes"
+    },
+    {
+      "id": "p107",
+      "description": "Conjunto pantalón y americana azul marino mujer",
+      "imageUrl": "https://images.unsplash.com/photo-1608234808654-2a8875faa7fd?w=600&h=800&fit=crop",
+      "imageHint": "navy Trajes"
+    },
+    {
+      "id": "p108",
+      "description": "Traje slim fit marrón chocolate con chaleco",
+      "imageUrl": "https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=600&h=800&fit=crop",
+      "imageHint": "slim Trajes"
     }
   ]
 }

@@ -11,6 +11,7 @@ export default function AboutPage() {
             src="https://picsum.photos/seed/about-hero/1200/800"
             alt="StyleSavvy Studio"
             fill
+            sizes="100vw"
             className="object-cover opacity-30 grayscale"
             data-ai-hint="fashion studio"
           />
@@ -54,6 +55,7 @@ export default function AboutPage() {
             src="https://picsum.photos/seed/philosophy/800/800"
             alt="Philosophy"
             fill
+            sizes="100vw"
             className="object-cover"
             data-ai-hint="minimalist clothing"
           />

@@ -1,17 +1,19 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
-import { Loader2, CreditCard, ShieldCheck, Landmark, Wallet } from 'lucide-react';
+import { Loader2, CreditCard, ShieldCheck, Landmark, Wallet, QrCode, Building2, Upload } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateInvoice } from '@/ai/flows/generate-invoice-flow';
 import { saveOrder } from '@/lib/store';
+import { saveOrderAction, updateProductStockAction } from '@/app/api/users/actions';
+import { Order } from '@/lib/types';
 
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
@@ -25,7 +27,54 @@ export default function CheckoutPage() {
     city: '',
     zip: ''
   });
+  const [isCustomerLogged, setIsCustomerLogged] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [transferRef, setTransferRef] = useState('');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>('Generando Factura y Enviando Correo...');
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const storedCustomer = sessionStorage.getItem('customerUser');
+    const storedEmail = sessionStorage.getItem('customerEmail');
+
+    if (!storedCustomer) {
+      router.push('/login?redirect=/checkout');
+      setSessionChecked(true);
+      return;
+    }
+
+    setIsCustomerLogged(true);
+    setSessionChecked(true);
+    setFormData((prev) => ({
+      ...prev,
+      firstName: storedCustomer.split(' ')[0] || '',
+      email: storedEmail || prev.email,
+    }));
+  }, [router]);
+
+  if (!sessionChecked) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isCustomerLogged) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+        <h2 className="text-2xl font-bold">Necesitas una cuenta para comprar</h2>
+        <Button onClick={() => router.push('/login?redirect=/checkout')}>Ir a Iniciar Sesión / Registrarse</Button>
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -41,11 +90,62 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    const formattedValue = value.replace(/(\d{4})/g, '$1 ').trim();
+    setCardNumber(formattedValue.substring(0, 19));
+  };
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    setCardExpiry(value.substring(0, 5));
+  };
+
+  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardCvv(e.target.value.replace(/\D/g, '').substring(0, 4));
+  };
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPaymentError(null);
     setIsProcessing(true);
+    setProcessingStatus('Iniciando proceso de pago...');
     
     try {
+      // Procesar pago simulado
+      setProcessingStatus('Procesando pago...');
+      const paymentResponse = await fetch('/api/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentMethod,
+          amount: total,
+          details: paymentMethod === 'card' ? {
+            cardNumber,
+            expiry: cardExpiry,
+            cvv: cardCvv,
+            name: (document.getElementById('cardName') as HTMLInputElement)?.value || ''
+          } : { reference: transferRef }
+        }),
+      });
+
+      if (!paymentResponse.ok) {
+        throw new Error('Error en el pago');
+      }
+
+      const paymentResult = await paymentResponse.json();
+      if (!paymentResult.success) {
+        setPaymentError(paymentResult.message);
+        setIsProcessing(false);
+        return;
+      }
+
+      setProcessingStatus('Generando Factura...');
       const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       
       // Generar factura con IA
@@ -56,26 +156,54 @@ export default function CheckoutPage() {
         items: cart.map(item => ({
           name: item.name,
           price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
+          size: item.selectedSize
         })),
         total: total,
         date: new Date().toLocaleDateString('es-AR')
       });
 
-      // Guardar pedido localmente
-      saveOrder({
+      const orderData: any = {
         id: `SS-${orderNumber}`,
         date: new Date().toISOString(),
         total: total,
-        status: 'completed',
+        status: 'completed' as const,
         items: cart.map(item => ({
           productId: item.id,
           name: item.name,
           price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
+          size: item.selectedSize
         }))
-      });
+      };
 
+      const userId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') : null;
+      if (userId) {
+        try {
+          await saveOrderAction(userId, {
+            orderNumber: orderData.id,
+            items: orderData.items,
+            total: orderData.total,
+            status: orderData.status || 'completed',
+          });
+
+          // Actualizar stock del producto
+          await updateProductStockAction(
+            cart.map(item => ({
+              productId: item.id,
+              size: item.selectedSize,
+              quantity: item.quantity
+            }))
+          );
+        } catch (saveError) {
+          console.error('Error saving order to DB:', saveError);
+          saveOrder(orderData as Order);
+        }
+      } else {
+        saveOrder(orderData as Order);
+      }
+
+      setProcessingStatus('Finalizando pedido...');
       // Simular retraso de procesamiento y envío de email
       setTimeout(() => {
         setIsProcessing(false);
@@ -88,6 +216,26 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error("Error en el checkout:", error);
       setIsProcessing(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      
+      if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable') || errorMessage.includes('high demand')) {
+        setPaymentError(
+          'Los servidores de generación de facturas están sobrecargados. Por favor, intenta de nuevo en unos momentos. El sistema reintentar automáticamente.'
+        );
+      } else if (errorMessage.includes('Error al generar')) {
+        setPaymentError(
+          'Error al generar tu factura. Por favor intenta de nuevo o contacta soporte.'
+        );
+      } else if (errorMessage.includes('pago')) {
+        setPaymentError(
+          'Error en el procesamiento del pago. Verifica tus datos e intenta de nuevo.'
+        );
+      } else {
+        setPaymentError(
+          `Ocurrió un error: ${errorMessage}. Por favor intenta de nuevo.`
+        );
+      }
     }
   };
 
@@ -111,27 +259,27 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nombre</Label>
-                  <Input id="firstName" placeholder="Juan" required onChange={handleInputChange} />
+                  <Input id="firstName" value={formData.firstName} placeholder="Juan" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Apellido</Label>
-                  <Input id="lastName" placeholder="Pérez" required onChange={handleInputChange} />
+                  <Input id="lastName" value={formData.lastName} placeholder="Pérez" required onChange={handleInputChange} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
                   <Label htmlFor="email">Correo Electrónico</Label>
-                  <Input id="email" type="email" placeholder="juan@ejemplo.com" required onChange={handleInputChange} />
+                  <Input id="email" type="email" value={formData.email} placeholder="juan@ejemplo.com" required onChange={handleInputChange} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
                   <Label htmlFor="address">Dirección Completa</Label>
-                  <Input id="address" placeholder="Calle 123 #45-67, Depto 4B" required onChange={handleInputChange} />
+                  <Input id="address" value={formData.address} placeholder="Calle 123 #45-67, Depto 4B" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Ciudad</Label>
-                  <Input id="city" placeholder="Buenos Aires" required onChange={handleInputChange} />
+                  <Input id="city" value={formData.city} placeholder="Buenos Aires" required onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zip">Código Postal</Label>
-                  <Input id="zip" placeholder="C1425" required onChange={handleInputChange} />
+                  <Input id="zip" value={formData.zip} placeholder="C1425" required onChange={handleInputChange} />
                 </div>
               </div>
             </section>
@@ -189,8 +337,9 @@ export default function CheckoutPage() {
                         <Input 
                           id="cardNumber" 
                           placeholder="0000 0000 0000 0000" 
-                          className="pl-10"
-                          maxLength={19}
+                          className="pl-10 font-mono tracking-widest"
+                          value={cardNumber}
+                          onChange={handleCardNumberChange}
                           required 
                         />
                         <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -199,34 +348,119 @@ export default function CheckoutPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="expiry">Vencimiento (MM/AA)</Label>
-                        <Input id="expiry" placeholder="MM/AA" maxLength={5} required />
+                        <Input 
+                          id="expiry" 
+                          placeholder="MM/AA" 
+                          className="font-mono text-center tracking-widest"
+                          value={cardExpiry}
+                          onChange={handleExpiryChange}
+                          required 
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="cvv">CVV</Label>
-                        <Input id="cvv" placeholder="123" maxLength={4} required />
+                        <Input 
+                          id="cvv" 
+                          placeholder="123" 
+                          className="font-mono text-center tracking-widest"
+                          value={cardCvv}
+                          onChange={handleCvvChange}
+                          required 
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-                      <Input id="cardName" placeholder="Como aparece en la tarjeta" required />
+                      <Input id="cardName" placeholder="Como aparece en la tarjeta" className="uppercase" required />
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {paymentMethod === 'transfer' && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="p-6 space-y-6">
+                    <div>
+                      <h4 className="flex items-center gap-2 font-bold text-lg mb-4">
+                        <Building2 className="h-5 w-5 text-primary" />
+                        Datos Bancarios
+                      </h4>
+                      <div className="space-y-2 rounded-lg bg-background p-4 border text-sm font-mono">
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-muted-foreground">Banco:</span>
+                          <strong>Banco Ciudad</strong>
+                        </div>
+                        <div className="flex justify-between border-b pb-2 pt-1">
+                          <span className="text-muted-foreground">Titular:</span>
+                          <strong>StyleSavvy SA</strong>
+                        </div>
+                        <div className="flex justify-between border-b pb-2 pt-1">
+                          <span className="text-muted-foreground">CBU:</span>
+                          <strong>0000003100000000000123</strong>
+                        </div>
+                        <div className="flex justify-between pt-1">
+                          <span className="text-muted-foreground">Alias:</span>
+                          <strong>STYLESAVVY.MODA</strong>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="transferRef">Número de Referencia / Comprobante</Label>
+                      <div className="relative">
+                        <Input 
+                          id="transferRef" 
+                          placeholder="Ingresa el número de operación" 
+                          className="pl-10"
+                          value={transferRef}
+                          onChange={(e) => setTransferRef(e.target.value)}
+                          required={paymentMethod === 'transfer'} 
+                        />
+                        <Upload className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Para agilizar la verificación, anota el número de ticket y guárdalo.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {paymentMethod === 'wallet' && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="p-6 flex flex-col items-center text-center space-y-6">
+                    <div className="rounded-xl bg-white p-4 shadow-sm inline-flex items-center justify-center border">
+                      <QrCode className="h-40 w-40 text-primary" strokeWidth={1} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg mb-2">Escanea el código QR</h4>
+                      <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">
+                        Abre tu billetera virtual (MercadoPago, MODO, etc.) y escanea el código para efectuar el pago de <strong>${total.toLocaleString('es-CO')}</strong>.
+                      </p>
+                    </div>
+                    <p className="text-xs bg-primary/10 text-primary font-bold py-2 px-4 rounded-full">
+                      El pago se acreditará instantáneamente.
+                    </p>
                   </CardContent>
                 </Card>
               )}
             </section>
 
+            {paymentError && (
+              <div className="rounded-lg bg-destructive/15 p-4 text-sm font-medium text-destructive">
+                {paymentError}
+              </div>
+            )}
+
             <Button 
               type="submit"
-              className="w-full bg-primary py-8 text-lg font-bold" 
+              className="w-full bg-primary py-8 text-lg font-bold transition-all" 
               disabled={isProcessing}
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Generando Factura y Enviando Correo...
+                  {processingStatus}
                 </>
               ) : (
-                <>Finalizar Pago ${total.toFixed(2)}</>
+                <>Finalizar Pago ${total.toLocaleString('es-CO')}</>
               )}
             </Button>
             
@@ -257,7 +491,7 @@ export default function CheckoutPage() {
                   <div className="space-y-2 pt-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>${total.toLocaleString('es-CO')}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Envío</span>
@@ -267,7 +501,7 @@ export default function CheckoutPage() {
                       <div className="flex items-end justify-between">
                         <span className="text-base font-bold">Total</span>
                         <div className="text-right">
-                          <span className="block text-2xl font-bold text-primary">${total.toFixed(2)}</span>
+                          <span className="block text-2xl font-bold text-primary">${total.toLocaleString('es-CO')}</span>
                         </div>
                       </div>
                     </div>

@@ -10,7 +10,7 @@ const getProducts = (): Product[] => {
       id: img.id,
       name: img.description.split(' ').slice(0, 3).join(' '),
       description: img.description,
-      price: 20 + (seed * 15) % 130, // Precio estable
+      price: 50000 + (seed * 15000) % 450000, // Precio en pesos colombianos
       stock: 5 + (seed * 7) % 45,    // Stock estable
       imageUrl: img.imageUrl,
       category: img.imageHint.split(' ')[1] || 'Prendas',
@@ -24,7 +24,7 @@ const getProducts = (): Product[] => {
 
 export const products = getProducts();
 
-let mockOrders: Order[] = [];
+const mockOrders: Order[] = [];
 
 export const saveOrder = (order: Order) => {
   mockOrders.push(order);

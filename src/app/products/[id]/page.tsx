@@ -1,58 +1,62 @@
-
-"use client";
-
-import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useFirestore, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
 import { generateProductDescription } from '@/ai/flows/generate-product-description-flow';
 import { ShoppingBag, ArrowLeft, Shield, Truck, RefreshCw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import CompleteTheLook from '@/components/CompleteTheLook';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Product } from '@/lib/types';
+import dbConnect from '@/lib/mongodb';
+import ProductModel from '@/lib/models/Product';
+import { notFound } from 'next/navigation';
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  const { id } = use(params);
-  const db = useFirestore();
-  const { data: product, loading } = useDoc<Product>(
-    db ? doc(db, 'products', id) : null
-  );
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+  await dbConnect();
 
-  const [aiDescription, setAiDescription] = useState<string>('');
+  let productDoc = null;
+  try {
+    productDoc = await ProductModel.findById(id).lean();
+  } catch(e) {
+    // invalid id format for mongodb likely
+  }
 
-  useEffect(() => {
-    if (product) {
-      generateProductDescription({
-        name: product.name,
-        category: product.category,
-        attributes: JSON.stringify({ material: "Premium Fiber", fit: "Modern Minimalist", wash: "Eco-Friendly" })
-      }).then(res => setAiDescription(res.description));
-    }
-  }, [product]);
-
-  if (loading) {
+  if (!productDoc) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">Cargando detalles del producto...</p>
+        <h1 className="text-2xl font-bold">Producto no encontrado</h1>
+        <Link href="/" className="rounded-full bg-primary px-8 py-3 text-white">Volver a la tienda</Link>
       </div>
     );
   }
 
-  if (!product) {
-    return (
-      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Producto no encontrado</h1>
-        <Button asChild>
-          <Link href="/">Volver a la tienda</Link>
-        </Button>
-      </div>
-    );
+  const product: Product = {
+    id: productDoc._id.toString(),
+    name: productDoc.name,
+    description: productDoc.description,
+    price: productDoc.price,
+    imageUrl: productDoc.imageUrl,
+    category: productDoc.category,
+    sizes: productDoc.sizes || [],
+    sizeStock: productDoc.sizeStock || [],
+    suggestions_ids: productDoc.suggestions_ids || [],
+  };
+
+  let aiDescription = '';
+  try {
+    const aiRes = await generateProductDescription({
+      name: product.name,
+      category: product.category,
+      attributes: JSON.stringify({ material: "Premium Fiber", fit: "Modern Minimalist", wash: "Eco-Friendly" })
+    });
+    if (aiRes && aiRes.description) {
+      aiDescription = aiRes.description;
+    }
+  } catch(e) {
+    // fallback to original desc
   }
 
   return (
@@ -69,6 +73,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             alt={product.name}
             fill
             priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover"
           />
         </div>
@@ -79,7 +84,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               {product.category}
             </span>
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl font-headline">{product.name}</h1>
-            <p className="mt-4 text-3xl font-light text-foreground">${product.price.toFixed(2)}</p>
+            <p className="mt-4 text-3xl font-light text-foreground">${product.price.toLocaleString('es-CO')}</p>
           </div>
 
           <div className="prose prose-sm text-muted-foreground">
@@ -91,7 +96,12 @@ export default function ProductPage({ params }: ProductPageProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <span className="text-sm font-bold">Stock:</span>
-              <span className="text-sm text-muted-foreground">{product.stock} unidades disponibles</span>
+              <span className="text-sm text-muted-foreground">
+                {product.sizeStock && product.sizeStock.length > 0 
+                  ? `${product.sizeStock.reduce((sum, s) => sum + s.stock, 0)} unidades disponibles`
+                  : '10 unidades disponibles'
+                }
+              </span>
             </div>
             <AddToCartButton product={product} />
           </div>
@@ -116,8 +126,4 @@ export default function ProductPage({ params }: ProductPageProps) {
       <CompleteTheLook mainProduct={product} />
     </div>
   );
-}
-
-function Button({ children, asChild, ...props }: any) {
-  return <button className="rounded-full bg-primary px-8 py-3 text-white" {...props}>{children}</button>;
 }

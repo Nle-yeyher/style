@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface CollectionDetailPageProps {
   params: Promise<{ category: string }>;
@@ -29,13 +30,16 @@ export default function CollectionDetailPage({ params }: CollectionDetailPagePro
   return (
     <div className="space-y-12 pb-20">
       <div className="space-y-6">
-        <Link 
-          href="/collections" 
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+        <Button 
+          variant="outline" 
+          asChild 
+          className="rounded-full gap-2 w-fit transition-all hover:bg-primary hover:text-primary-foreground group"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a Colecciones
-        </Link>
+          <Link href="/collections">
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Volver a Colecciones
+          </Link>
+        </Button>
         
         <div className="border-b pb-8">
           <h1 className="text-4xl font-bold font-headline capitalize">

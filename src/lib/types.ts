@@ -1,14 +1,28 @@
 
+export interface SizeStock {
+  size: string;
+  stock: number;
+  sold: number;
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
-  stock: number;
   imageUrl: string;
   category: string;
+  sizes?: string[];
+  sizeStock?: SizeStock[];
   suggestions_ids: string[];
-  createdAt?: any;
+  createdAt?: Date | string;
+}
+
+export interface SizeAvailability {
+  size: string;
+  available: number;
+  sold: number;
+  isAvailable: boolean;
 }
 
 export interface OrderItem {
@@ -16,6 +30,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+  size?: string;
 }
 
 export interface Order {

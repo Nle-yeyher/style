@@ -7,7 +7,8 @@ import { getOrders } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { getOrdersAction } from '@/app/api/users/actions';
 
 export default function OrdersPage() {
   // Normally this would be a server-side fetch from the DB.
@@ -15,33 +16,47 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    // Generate some mock history if store is empty
-    const saved = getOrders();
-    if (saved.length === 0) {
-      setOrders([
-        {
-          id: 'ORD-12345',
-          date: '2023-11-15',
-          total: 189.99,
-          status: 'completed',
-          items: [
-            { productId: 'p1', name: 'Minimalist T-Shirt', price: 45.00, quantity: 2 },
-            { productId: 'p3', name: 'Linen Trousers', price: 99.99, quantity: 1 }
-          ]
-        },
-        {
-          id: 'ORD-67890',
-          date: '2023-10-22',
-          total: 120.00,
-          status: 'completed',
-          items: [
-            { productId: 'p2', name: 'Denim Jacket', price: 120.00, quantity: 1 }
-          ]
+    const loadOrders = async () => {
+      if (typeof window === 'undefined') return;
+
+      const userId = sessionStorage.getItem('userId');
+      if (userId) {
+        const result = await getOrdersAction(userId);
+        if (result.success) {
+          setOrders(result.orders);
+          return;
         }
-      ]);
-    } else {
-      setOrders(saved);
-    }
+      }
+
+      const saved = getOrders();
+      if (saved.length === 0) {
+        setOrders([
+          {
+            id: 'ORD-12345',
+            date: '2023-11-15',
+            total: 189.99,
+            status: 'completed',
+            items: [
+              { productId: 'p1', name: 'Minimalist T-Shirt', price: 45.0, quantity: 2 },
+              { productId: 'p3', name: 'Linen Trousers', price: 99.99, quantity: 1 }
+            ]
+          },
+          {
+            id: 'ORD-67890',
+            date: '2023-10-22',
+            total: 120.0,
+            status: 'completed',
+            items: [
+              { productId: 'p2', name: 'Denim Jacket', price: 120.0, quantity: 1 }
+            ]
+          }
+        ]);
+      } else {
+        setOrders(saved);
+      }
+    };
+
+    loadOrders();
   }, []);
 
   return (
@@ -85,10 +100,13 @@ export default function OrdersPage() {
                         </div>
                         <div>
                           <p className="font-bold">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">Quantity: {item.quantity}</p>
+                          <p className="text-xs text-muted-foreground">Cantidad: {item.quantity}</p>
+                          {item.size && (
+                            <p className="text-xs text-muted-foreground">Talla: {item.size}</p>
+                          )}
                         </div>
                       </div>
-                      <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium">${(item.price * item.quantity).toLocaleString('es-CO')}</p>
                     </div>
                   ))}
                 </div>

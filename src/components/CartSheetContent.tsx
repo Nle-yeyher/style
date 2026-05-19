@@ -28,19 +28,23 @@ export function CartSheetContent() {
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-6">
           {cart.map((item) => (
-            <div key={item.id} className="flex gap-4">
+            <div key={`${item.id}-${item.selectedSize || 'default'}`} className="flex gap-4">
               <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-md border">
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
                   fill
+                  sizes="80px"
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-1 flex-col justify-between">
                 <div>
                   <h4 className="font-medium">{item.name}</h4>
-                  <p className="text-sm text-muted-foreground">${item.price}</p>
+                  {item.selectedSize && (
+                    <p className="text-xs text-muted-foreground">Talla: {item.selectedSize}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">${item.price.toLocaleString('es-CO')}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -48,7 +52,7 @@ export function CartSheetContent() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, -1)}
+                      onClick={() => updateQuantity(item.id, -1, item.selectedSize)}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
@@ -57,7 +61,7 @@ export function CartSheetContent() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, 1)}
+                      onClick={() => updateQuantity(item.id, 1, item.selectedSize)}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
@@ -66,7 +70,7 @@ export function CartSheetContent() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive"
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id, item.selectedSize)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

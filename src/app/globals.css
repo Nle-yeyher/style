@@ -1,23 +1,24 @@
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 @layer base {
   :root {
-    --background: 210 15% 94%; /* #EEF0F3 */
+    --background: 210 15% 94%;
+    /* #EEF0F3 */
     --foreground: 224 28% 15%;
     --card: 0 0% 100%;
     --card-foreground: 224 28% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 28% 15%;
-    --primary: 224 28% 44%; /* #51628F */
+    --primary: 224 28% 44%;
+    /* #51628F */
     --primary-foreground: 210 15% 98%;
     --secondary: 210 15% 90%;
     --secondary-foreground: 224 28% 44%;
     --muted: 210 15% 88%;
     --muted-foreground: 224 10% 40%;
-    --accent: 196 69% 59%; /* #52B9DE */
+    --accent: 196 69% 59%;
+    /* #52B9DE */
     --accent-foreground: 210 15% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 15% 98%;
@@ -59,6 +60,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

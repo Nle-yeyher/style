@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { products } from '@/lib/store';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { ChevronRight } from 'lucide-react';
 
 export default function CollectionsPage() {
@@ -40,6 +40,8 @@ export default function CollectionsPage() {
                 src={collection.image}
                 alt={collection.name}
                 fill
+                loading="eager"
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

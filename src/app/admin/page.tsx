@@ -1,11 +1,7 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFirestore, useCollection, useUser, useAuth } from '@/firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,38 +13,60 @@ import { Plus, Pencil, Trash2, Package, RefreshCw, Loader2, LogOut, LayoutDashbo
 import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/lib/types';
 import Image from 'next/image';
+import { getProductsAction, addProductAction, updateProductAction, deleteProductAction } from './actions';
 
 export default function AdminDashboard() {
-  const { user, loading: authLoading } = useUser();
-  const auth = useAuth();
-  const db = useFirestore();
+  const [adminUser, setAdminUser] = useState<string | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('admin@stylesavvy.com');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   
-  const { data: products, loading: productsLoading } = useCollection<Product>(
-    db ? collection(db, 'products') : null
-  );
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/admin/login');
-    }
-  }, [user, authLoading, router]);
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    await signOut(auth);
-    router.push('/admin/login');
+  const loadProducts = () => {
+    setProductsLoading(true);
+    getProductsAction()
+      .then(setProducts)
+      .finally(() => setProductsLoading(false));
   };
 
-  const handleSaveProduct = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!db) return;
+  useEffect(() => {
+    const storedAdmin = typeof window !== 'undefined' ? sessionStorage.getItem('adminUser') : null;
+    setAdminUser(storedAdmin);
+    setIsAuthChecked(true);
+    loadProducts();
+  }, []);
 
+  const handleAdminLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (adminEmail === 'admin@stylesavvy.com' && adminPassword === 'admin123') {
+      sessionStorage.setItem('adminUser', adminEmail);
+      setAdminUser(adminEmail);
+      setLoginError(null);
+      loadProducts();
+      return;
+    }
+    setLoginError('Credenciales inválidas. Usa admin@stylesavvy.com / admin123');
+  };
+
+  const handleLogout = async () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('adminUser');
+    }
+    setAdminUser(null);
+    router.push('/');
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const productData = {
@@ -59,47 +77,102 @@ export default function AdminDashboard() {
       description: formData.get('description') as string,
       imageUrl: formData.get('imageUrl') as string || 'https://picsum.photos/seed/new/600/800',
       suggestions_ids: editingProduct?.suggestions_ids || [],
-      updatedAt: serverTimestamp(),
     };
 
-    const mutationPromise = editingProduct?.id 
-      ? updateDoc(doc(db, 'products', editingProduct.id), productData)
-      : addDoc(collection(db, 'products'), { ...productData, createdAt: serverTimestamp() });
-
-    mutationPromise
-      .then(() => {
-        toast({ title: editingProduct?.id ? "Producto actualizado" : "Producto creado" });
-        setIsDialogOpen(false);
-        setEditingProduct(null);
-      })
-      .catch((error) => {
-        console.error("Error saving product:", error);
-        toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    try {
+      if (editingProduct?.id) {
+        await updateProductAction(editingProduct.id, productData);
+        toast({ title: "Producto actualizado" });
+      } else {
+        await addProductAction(productData);
+        toast({ title: "Producto creado" });
+      }
+      setIsDialogOpen(false);
+      setEditingProduct(null);
+      loadProducts();
+    } catch (error) {
+      console.error("Error saving product:", error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteProduct = (id: string) => {
-    if (!db || !confirm("¿Estás seguro de eliminar este producto?")) return;
-    deleteDoc(doc(db, 'products', id))
-      .then(() => {
-        toast({ title: "Producto eliminado" });
-      })
-      .catch((error) => {
-        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
-      });
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+    try {
+      await deleteProductAction(id);
+      toast({ title: "Producto eliminado" });
+      loadProducts();
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
+    }
   };
 
-  if (authLoading || !user) {
+  if (!isAuthChecked) {
     return (
-      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground font-medium">Verificando credenciales...</p>
       </div>
     );
   }
+
+  if (!adminUser) {
+    return (
+      <div className="mx-auto max-w-md py-20 px-4">
+        <div className="rounded-3xl border bg-background p-10 shadow-sm">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold">Acceso de Administrador</h1>
+            <p className="text-muted-foreground">Inicia sesión para gestionar productos y colecciones.</p>
+          </div>
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="adminEmail">Email</Label>
+              <Input
+                id="adminEmail"
+                value={adminEmail}
+                onChange={(event) => setAdminEmail(event.target.value)}
+                type="email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adminPassword">Contraseña</Label>
+              <Input
+                id="adminPassword"
+                value={adminPassword}
+                onChange={(event) => setAdminPassword(event.target.value)}
+                type="password"
+                required
+              />
+            </div>
+            {loginError ? <p className="text-sm text-destructive">{loginError}</p> : null}
+            <Button type="submit" className="w-full">Iniciar Sesión</Button>
+            <p className="text-sm text-muted-foreground">
+              Usa <strong>admin@stylesavvy.com</strong> y contraseña <strong>admin123</strong>.
+            </p>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  const categories = Array.from(new Set(products.map(p => p.category)));
+  const collections = categories.map((category) => {
+    const items = products.filter((p) => p.category === category);
+    return {
+      name: category,
+      count: items.length,
+      totalStock: items.reduce((sum, product) => {
+        if (product.sizeStock && product.sizeStock.length > 0) {
+          return sum + product.sizeStock.reduce((s: any, ss: any) => s + ss.stock, 0);
+        }
+        return sum + 10; // fallback
+      }, 0),
+    };
+  });
+
+  const user = { displayName: adminUser.split('@')[0] };
 
   return (
     <div className="space-y-8 pb-20">
@@ -109,12 +182,12 @@ export default function AdminDashboard() {
             <LayoutDashboard className="h-5 w-5" />
             <span className="text-xs font-bold uppercase tracking-widest">Panel de Control</span>
           </div>
-          <h1 className="text-3xl font-bold font-headline">Hola, {user.displayName?.split(' ')[0]}</h1>
+          <h1 className="text-3xl font-bold font-headline">Hola, {user.displayName}</h1>
           <p className="text-muted-foreground">Gestiona el inventario global de la tienda.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" /> Cerrar Sesión
+            <LogOut className="h-4 w-4" /> Seguir Comprando
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -140,8 +213,8 @@ export default function AdminDashboard() {
                     <Input id="category" name="category" defaultValue={editingProduct?.category} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">Precio ($)</Label>
-                    <Input id="price" name="price" type="number" step="0.01" defaultValue={editingProduct?.price} required />
+                    <Label htmlFor="price">Precio (COP$)</Label>
+                    <Input id="price" name="price" type="number" step="1000" defaultValue={editingProduct?.price} required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="stock">Stock</Label>
@@ -179,7 +252,7 @@ export default function AdminDashboard() {
                 <Package className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{products?.length || 0}</div>
+                <div className="text-2xl font-bold">{products.length}</div>
               </CardContent>
             </Card>
             <Card className="bg-primary/5 border-none">
@@ -189,10 +262,39 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-destructive">
-                  {products?.filter(p => p.stock < 5).length || 0}
+                  {products.filter(p => p.stock < 5).length}
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Colecciones</h2>
+                <p className="text-muted-foreground">Visualiza las categorías que hay en la tienda.</p>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {collections.map((collection) => (
+                <Card key={collection.name} className="border-none shadow-sm">
+                  <CardContent>
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Colección</p>
+                        <h3 className="text-xl font-semibold">{collection.name}</h3>
+                      </div>
+                      <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+                        {collection.count}
+                      </span>
+                    </div>
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      Stock total: {collection.totalStock} unidades
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
           <Card className="border-none shadow-sm overflow-hidden">
@@ -207,22 +309,29 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products?.map((product) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="relative h-12 w-10 overflow-hidden rounded border">
-                        <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+                        <Image src={product.imageUrl} alt={product.name} fill sizes="100vw" className="object-cover" />
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="font-bold">{product.name}</div>
                       <div className="text-xs text-muted-foreground uppercase">{product.category}</div>
                     </TableCell>
-                    <TableCell className="font-mono font-bold">${product.price.toFixed(2)}</TableCell>
+                    <TableCell className="font-mono font-bold">${product.price.toLocaleString('es-CO')}</TableCell>
                     <TableCell>
-                      <span className={`rounded-full px-2 py-1 text-xs font-bold ${product.stock < 5 ? 'bg-destructive/10 text-destructive' : 'bg-green-100 text-green-700'}`}>
-                        {product.stock} unidades
-                      </span>
+                      {(() => {
+                        const totalStock = product.sizeStock && product.sizeStock.length > 0 
+                          ? product.sizeStock.reduce((sum, s) => sum + s.stock, 0)
+                          : 10;
+                        return (
+                          <span className={`rounded-full px-2 py-1 text-xs font-bold ${totalStock < 5 ? 'bg-destructive/10 text-destructive' : 'bg-green-100 text-green-700'}`}>
+                            {totalStock} unidades
+                          </span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

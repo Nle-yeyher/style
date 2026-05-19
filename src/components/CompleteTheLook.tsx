@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/lib/types';
@@ -23,7 +23,9 @@ export default function CompleteTheLook({ mainProduct }: CompleteTheLookProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
-  const complementaryProducts = products.filter(p => mainProduct.suggestions_ids.includes(p.id));
+  const complementaryProducts = useMemo(() => {
+    return products.filter(p => mainProduct.suggestions_ids.includes(p.id));
+  }, [mainProduct.suggestions_ids]);
 
   useEffect(() => {
     async function getAdvice() {
@@ -50,7 +52,7 @@ export default function CompleteTheLook({ mainProduct }: CompleteTheLookProps) {
       }
     }
     getAdvice();
-  }, [mainProduct]);
+  }, [mainProduct, complementaryProducts]);
 
   return (
     <section className="mt-20 border-t pt-20">
@@ -75,12 +77,13 @@ export default function CompleteTheLook({ mainProduct }: CompleteTheLookProps) {
                       src={p.imageUrl}
                       alt={p.name}
                       fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
                       className="object-cover transition-transform group-hover:scale-105"
                     />
                   </div>
                   <div className="mt-3">
                     <h4 className="text-sm font-medium">{p.name}</h4>
-                    <p className="text-sm font-bold text-primary">${p.price}</p>
+                    <p className="text-sm font-bold text-primary">${p.price.toLocaleString('es-CO')}</p>
                   </div>
                 </Link>
                 <Button 

@@ -1,36 +1,47 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, Menu, X, UserCog, LogOut } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { CartSheetContent } from './CartSheetContent';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 
 export default function Navbar() {
   const { cart } = useCart();
-  const { user } = useUser();
-  const auth = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [customerName, setCustomerName] = useState('');
   const router = useRouter();
   
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedCustomer = sessionStorage.getItem('customerUser');
+    if (storedCustomer) {
+      setCustomerName(storedCustomer);
+    }
+  }, []);
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length === 0) return '';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const handleLogout = () => {
+    if (typeof window === 'undefined') return;
+    sessionStorage.removeItem('customerUser');
+    sessionStorage.removeItem('customerEmail');
+    sessionStorage.removeItem('userId');
+    router.push('/login');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +50,6 @@ export default function Navbar() {
       setIsSearchOpen(false);
       setSearchQuery('');
     }
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    await signOut(auth);
-    router.push('/');
   };
 
   return (
@@ -60,7 +65,6 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <Link href="/" className="transition-colors hover:text-primary">Tienda</Link>
           <Link href="/collections" className="transition-colors hover:text-primary">Colecciones</Link>
           <Link href="/about" className="transition-colors hover:text-primary">Nosotros</Link>
         </div>
@@ -111,39 +115,36 @@ export default function Navbar() {
             </SheetContent>
           </Sheet>
 
-          {user ? (
+          {customerName ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full ml-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || ''} />
-                    <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
-                  </Avatar>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={`Abrir menú de usuario para ${customerName}`}
+                  className="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold uppercase text-white shadow-sm transition hover:bg-primary/90"
+                >
+                  {getInitials(customerName)}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+              <DropdownMenuContent align="end" sideOffset={8} className="w-48">
+                <div className="px-2 py-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">Cuenta</div>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin" className="cursor-pointer gap-2">
-                    <UserCog className="h-4 w-4" /> Panel Admin
-                  </Link>
+                  <Link href="/profile">Mi Perfil</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive gap-2">
-                  <LogOut className="h-4 w-4" /> Cerrar Sesión
+                <DropdownMenuItem asChild>
+                  <Link href="/orders">Mis Pedidos</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/collections">Tienda</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleLogout}>Cerrar Sesión</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="ghost" size="icon" asChild className="ml-2">
-              <Link href="/admin/login">
-                <UserCog className="h-5 w-5" />
-              </Link>
+            <Button variant="outline" size="sm" asChild className="ml-2">
+              <Link href="/login">Iniciar Sesión</Link>
             </Button>
           )}
         </div>

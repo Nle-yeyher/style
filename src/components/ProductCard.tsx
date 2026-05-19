@@ -3,61 +3,86 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
 import { ShoppingCart } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import ProductModal from '@/components/ProductModal';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
-  const { toast } = useToast();
+  const [showModal, setShowModal] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // Calcular stock total disponible
+  const totalStock = product.sizeStock
+    ? product.sizeStock.reduce((sum, s) => sum + s.stock, 0)
+    : 10;
+
+  const handleImageClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product);
-    toast({
-      title: "Añadido a la bolsa",
-      description: `${product.name} ya está en tu carrito.`,
-    });
+    setShowModal(true);
   };
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all hover:shadow-md">
-      <Link href={`/products/${product.id}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
-            <Button 
-              className="w-full gap-2 bg-primary text-primary-foreground" 
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Agregar rápido
-            </Button>
+    <>
+      <div className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all hover:shadow-md">
+        <button 
+          onClick={handleImageClick}
+          className="block text-left"
+        >
+          <div className="relative aspect-[3/4] overflow-hidden bg-muted cursor-pointer">
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
+              <Button 
+                className="w-full gap-2 bg-primary text-primary-foreground" 
+                onClick={handleImageClick}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Ver detalles
+              </Button>
+            </div>
           </div>
-        </div>
+        </button>
+        
         <div className="flex flex-col p-4">
           <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {product.category}
           </span>
-          <h3 className="font-semibold transition-colors group-hover:text-primary">
+          <h3 className="font-semibold transition-colors hover:text-primary cursor-pointer" onClick={handleImageClick}>
             {product.name}
           </h3>
-          <p className="mt-1 text-lg font-bold text-foreground">
-            ${product.price}
-          </p>
+          <div className="mt-1 flex items-center justify-between">
+            <p className="text-lg font-bold text-foreground">
+              ${product.price.toLocaleString('es-CO')}
+            </p>
+            <span className={cn(
+              "text-xs font-medium px-2 py-1 rounded-md",
+              totalStock > 0
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            )}>
+              {totalStock > 0 ? `${totalStock} en stock` : 'Agotado'}
+            </span>
+          </div>
         </div>
-      </Link>
-    </div>
+      </div>
+
+      <ProductModal 
+        product={product}
+        open={showModal}
+        onOpenChange={setShowModal}
+      />
+    </>
   );
 }
+
+import { cn } from '@/lib/utils';
