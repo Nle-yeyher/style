@@ -1,6 +1,6 @@
 "use server";
 
-import dbConnect from '@/lib/mongodb';
+import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 import { revalidatePath } from 'next/cache';
 

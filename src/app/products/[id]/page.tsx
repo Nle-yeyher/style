@@ -5,7 +5,7 @@ import Link from 'next/link';
 import CompleteTheLook from '@/components/CompleteTheLook';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Product } from '@/lib/types';
-import dbConnect from '@/lib/mongodb';
+import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 import { notFound } from 'next/navigation';
 

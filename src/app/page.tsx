@@ -1,5 +1,5 @@
 import { Product } from '@/lib/types';
-import dbConnect from '@/lib/mongodb';
+import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 import Link from 'next/link';
 import Image from 'next/image';

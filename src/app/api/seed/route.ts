@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
+import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 
 const DUMMY_PRODUCTS = [
