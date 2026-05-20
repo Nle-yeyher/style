@@ -172,7 +172,7 @@ const ProductModel = {
 
       if (setClauses.length) {
         values.push(id);
-        await conn.execute(`UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`, values);
+        await conn.execute(`UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`, values as any[]);
       }
 
       await conn.commit();
