@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 
 export async function GET(
@@ -8,16 +7,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    await dbConnect();
 
-    const product = await ProductModel.findById(id).lean();
-    
+    const product = await (await ProductModel.findById(id)).lean();
+
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json({
-      id: product._id.toString(),
+      id: product.id,
       name: product.name,
       sizeStock: product.sizeStock || [],
       sizes: product.sizes || [],

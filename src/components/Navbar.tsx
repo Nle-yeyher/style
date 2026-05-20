@@ -22,10 +22,18 @@ export default function Navbar() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const storedCustomer = sessionStorage.getItem('customerUser');
-    if (storedCustomer) {
-      setCustomerName(storedCustomer);
-    }
+
+    const refreshCustomer = () => {
+      const storedCustomer = sessionStorage.getItem('customerUser');
+      setCustomerName(storedCustomer || '');
+    };
+
+    refreshCustomer();
+
+    window.addEventListener('stylesavvy-auth-change', refreshCustomer);
+    return () => {
+      window.removeEventListener('stylesavvy-auth-change', refreshCustomer);
+    };
   }, []);
 
   const getInitials = (name: string) => {
@@ -40,6 +48,7 @@ export default function Navbar() {
     sessionStorage.removeItem('customerUser');
     sessionStorage.removeItem('customerEmail');
     sessionStorage.removeItem('userId');
+    window.dispatchEvent(new Event('stylesavvy-auth-change'));
     router.push('/login');
   };
 

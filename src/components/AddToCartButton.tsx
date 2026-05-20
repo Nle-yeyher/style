@@ -1,58 +1,46 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import SizeSelector from '@/components/SizeSelector';
 
 export default function AddToCartButton({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const [showSizeSelector, setShowSizeSelector] = useState(false);
+
+  const totalStock = useMemo<number | undefined>(() => {
+    if (product.sizeStock && product.sizeStock.length > 0) {
+      return product.sizeStock.reduce((sum, item) => sum + item.stock, 0);
+    }
+    return undefined;
+  }, [product.sizeStock]);
+
+  const isOutOfStock = totalStock !== undefined ? totalStock <= 0 : false;
 
   const handleAddToCart = () => {
-    // Si el producto tiene tallas, mostrar el selector
-    if (product.sizes && product.sizes.length > 0) {
-      setShowSizeSelector(true);
-    } else {
-      // Si no tiene tallas, añadir sin talla
-      addToCart(product);
-      toast({
-        title: "Added to Bag",
-        description: `${product.name} has been added to your shopping bag.`
-      });
-    }
-  };
-
-  const handleSizeSelected = (size: string) => {
-    addToCart(product, size);
+    if (isOutOfStock) return;
+    addToCart(product);
     toast({
-      title: "Added to Bag",
-      description: `${product.name} (Size: ${size}) has been added to your shopping bag.`
+      title: 'Añadido a la bolsa',
+      description: `${product.name} ha sido añadido a tu carrito.`,
     });
   };
 
   return (
-    <>
-      <Button 
-        className="h-14 w-full gap-3 bg-primary text-lg" 
+    <div className="space-y-4">
+      <Button
+        className="h-14 w-full gap-3 bg-primary text-lg"
         size="lg"
         onClick={handleAddToCart}
+        disabled={isOutOfStock}
       >
         <ShoppingBag className="h-5 w-5" />
-        Add to Shopping Bag
+        {isOutOfStock ? 'Agotado' : 'Añadir a la bolsa'}
       </Button>
-      
-      <SizeSelector
-        product={product}
-        open={showSizeSelector}
-        onOpenChange={setShowSizeSelector}
-        onSizeSelected={handleSizeSelected}
-      />
-    </>
+    </div>
   );
 }

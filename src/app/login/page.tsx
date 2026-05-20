@@ -56,6 +56,7 @@ export default function LoginPage() {
       sessionStorage.setItem('customerUser', result.user.name);
       sessionStorage.setItem('customerEmail', result.user.email);
       sessionStorage.setItem('userId', result.user.id);
+      window.dispatchEvent(new Event('stylesavvy-auth-change'));
     }
 
     router.push(redirectTo);
@@ -65,6 +66,8 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('customerUser');
       sessionStorage.removeItem('customerEmail');
+      sessionStorage.removeItem('userId');
+      window.dispatchEvent(new Event('stylesavvy-auth-change'));
     }
     setCustomerUser(null);
     setCustomerEmail('');

@@ -34,7 +34,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const product: Product = {
-    id: productDoc._id.toString(),
+    id: productDoc.id.toString(),
     name: productDoc.name,
     description: productDoc.description,
     price: productDoc.price,
@@ -94,15 +94,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-bold">Stock:</span>
-              <span className="text-sm text-muted-foreground">
-                {product.sizeStock && product.sizeStock.length > 0 
-                  ? `${product.sizeStock.reduce((sum, s) => sum + s.stock, 0)} unidades disponibles`
-                  : '10 unidades disponibles'
-                }
-              </span>
-            </div>
             <AddToCartButton product={product} />
           </div>
 

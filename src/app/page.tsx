@@ -1,25 +1,11 @@
 import { Product } from '@/lib/types';
-import dbConnect from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default async function Home() {
-  await dbConnect();
-  const productsDocs = await ProductModel.find({}).lean() as any[];
-  const products: Product[] = productsDocs.map(doc => ({
-    id: doc._id.toString(),
-    name: doc.name,
-    description: doc.description,
-    price: doc.price,
-    imageUrl: doc.imageUrl,
-    category: doc.category,
-    sizes: doc.sizes || [],
-    sizeStock: doc.sizeStock || [],
-    suggestions_ids: doc.suggestions_ids || [],
-  }));
+  const products: Product[] = await (await ProductModel.find({})).lean() as any[];
 
-  // Obtener categorías únicas
   const categories = Array.from(new Set(products.map(p => p.category)));
   const collections = categories.slice(0, 6).map(category => {
     const categoryProducts = products.filter(p => p.category === category);
@@ -52,16 +38,13 @@ export default async function Home() {
             </button>
           </div>
         </div>
-        <div className="absolute right-0 top-0 hidden h-full w-1/2 opacity-20 md:block">
-           {/* Decorative background element or image could go here */}
-        </div>
       </section>
 
       <section className="space-y-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((collection) => (
-            <Link 
-              key={collection.name} 
+            <Link
+              key={collection.name}
               href={`/collections/${collection.slug}`}
               className="group block overflow-hidden rounded-2xl bg-muted"
             >
@@ -93,9 +76,9 @@ export default async function Home() {
           <p className="mt-4 text-muted-foreground">Obtén acceso anticipado a nuevos productos de ropa, accesorios y calzado.</p>
           <div className="mt-8 flex justify-center">
             <div className="flex w-full max-w-md gap-2">
-              <input 
-                type="email" 
-                placeholder="Tu correo electrónico" 
+              <input
+                type="email"
+                placeholder="Tu correo electrónico"
                 className="flex-1 rounded-full border bg-background px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90">

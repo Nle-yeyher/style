@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Product } from '@/lib/types';
 import {
   Dialog,
@@ -29,6 +29,24 @@ export default function SizeSelector({
 }: SizeSelectorProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
+  const sizeAvailability = useMemo(() => {
+    if (product.sizeStock && product.sizeStock.length > 0) {
+      return product.sizeStock.map((size) => ({
+        size: size.size,
+        available: size.stock,
+        sold: size.sold,
+        isAvailable: size.stock > 0,
+      }));
+    }
+
+    return (product.sizes || ['S', 'M', 'L', 'XL', 'XXL']).map((size) => ({
+      size,
+      available: 0,
+      sold: 0,
+      isAvailable: true,
+    }));
+  }, [product.sizeStock, product.sizes]);
+
   const handleConfirm = () => {
     if (selectedSize) {
       onSizeSelected(selectedSize);
@@ -37,51 +55,74 @@ export default function SizeSelector({
     }
   };
 
-  const sizes = product.sizes || ['S', 'M', 'L', 'XL', 'XXL'];
+  const selectedAvailability = sizeAvailability.find((item) => item.size === selectedSize);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Size</DialogTitle>
+          <DialogTitle>Seleccionar talla</DialogTitle>
           <DialogDescription>
-            Choose a size for {product.name}
+            Elige la talla para {product.name}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-5 gap-2">
-            {sizes.map((size) => (
+            {sizeAvailability.map((item) => (
               <button
-                key={size}
-                onClick={() => setSelectedSize(size)}
+                key={item.size}
+                type="button"
+                onClick={() => setSelectedSize(item.size)}
+                disabled={!item.isAvailable}
                 className={cn(
-                  "py-3 px-2 border-2 rounded-lg font-semibold transition-all",
-                  selectedSize === size
+                  "py-3 px-2 border-2 rounded-lg font-semibold transition-all text-xs",
+                  selectedSize === item.size
                     ? "border-primary bg-primary text-white"
-                    : "border-gray-300 hover:border-primary"
+                    : item.isAvailable
+                    ? "border-gray-300 hover:border-primary"
+                    : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
                 )}
               >
-                {size}
+                {item.size}
               </button>
             ))}
           </div>
+
+          {selectedAvailability ? (
+            <div className={cn(
+              "rounded-xl border p-4 text-sm",
+              selectedAvailability.isAvailable
+                ? 'border-green-200 bg-green-50 text-green-800'
+                : 'border-red-200 bg-red-50 text-red-800'
+            )}>
+              {selectedAvailability.isAvailable ? (
+                <>
+                  <p className="font-semibold">Talla disponible</p>
+                  <p>{selectedAvailability.available} unidades en stock</p>
+                  <p className="text-xs text-muted-foreground">Vendidas: {selectedAvailability.sold}</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold">Talla agotada</p>
+                  <p>Por favor elige otra talla o regresa más tarde.</p>
+                </>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <DialogFooter className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
           </Button>
           <Button
-            disabled={!selectedSize}
+            disabled={!selectedSize || !selectedAvailability?.isAvailable}
             onClick={handleConfirm}
             className="gap-2"
           >
             <ShoppingBag className="h-4 w-4" />
-            Add to Bag
+            Añadir a la bolsa
           </Button>
         </DialogFooter>
       </DialogContent>

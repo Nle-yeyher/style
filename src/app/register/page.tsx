@@ -54,6 +54,7 @@ export default function RegisterPage() {
         sessionStorage.setItem('customerUser', result.user!.name);
         sessionStorage.setItem('customerEmail', result.user!.email);
         sessionStorage.setItem('userId', result.user!.id);
+        window.dispatchEvent(new Event('stylesavvy-auth-change'));
       }
 
       router.push(redirectTo);
