@@ -1,72 +1,43 @@
 import { Product } from '@/lib/types';
 import ProductModel from '@/lib/models/Product';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default async function Home() {
   const products: Product[] = await (await ProductModel.find({})).lean() as any[];
 
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  const collections = categories.slice(0, 6).map(category => {
-    const categoryProducts = products.filter(p => p.category === category);
-    const representativeProduct = categoryProducts[0];
-    return {
-      name: category,
-      slug: category.toLowerCase().replace(/\s+/g, '-'),
-      image: representativeProduct?.imageUrl || 'https://picsum.photos/seed/coll/600/800',
-      count: categoryProducts.length
-    };
-  });
-
   return (
     <div className="space-y-12">
-      <section className="relative overflow-hidden rounded-3xl bg-primary py-24 text-white">
-        <div className="container relative z-10 px-8">
-          <h1 className="max-w-2xl text-5xl font-bold tracking-tight md:text-7xl font-headline">
-            Ropa Minimalista, <br />
-            <span className="text-accent">Accesorios y Calzado</span>
-          </h1>
-          <p className="mt-6 max-w-lg text-lg text-primary-foreground/80">
-            Descubre nuestra colección de prendas de vestir, accesorios modernos y calzado premium. Diseñados con materiales de alta calidad para un estilo atemporal.
-          </p>
-          <div className="mt-10 flex gap-4">
-            <button className="rounded-full bg-accent px-8 py-4 text-sm font-bold transition-transform hover:scale-105">
-              Ver Productos
-            </button>
-            <button className="rounded-full border border-white/20 px-8 py-4 text-sm font-bold backdrop-blur-sm transition-colors hover:bg-white/10">
-              Ver Colecciones
-            </button>
-          </div>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-primary/95 py-32 text-white shadow-lg">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-accent blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/50 blur-3xl" />
         </div>
-      </section>
+        
+        <div className="container relative z-10 px-8 max-w-4xl mx-auto">
+          <div className="space-y-6">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight font-headline leading-tight">
+              Moda Minimalista<br />
+              <span className="text-accent">Premium</span>
+            </h1>
+            <p className="text-lg text-white/90 max-w-2xl leading-relaxed">
+              Descubre nuestra colección curada de prendas, accesorios y calzado diseñados con materiales de alta calidad. Estilo atemporal para quienes valoran la elegancia en la simplicidad.
+            </p>
+          </div>
 
-      <section className="space-y-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {collections.map((collection) => (
+          <div className="mt-12 flex flex-wrap gap-4">
             <Link
-              key={collection.name}
-              href={`/collections/${collection.slug}`}
-              className="group block overflow-hidden rounded-2xl bg-muted"
+              href="/search"
+              className="inline-flex items-center justify-center rounded-full bg-accent text-primary px-8 py-4 text-sm font-bold transition-all hover:shadow-lg hover:scale-105 active:scale-95"
             >
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <Image
-                  src={collection.image}
-                  alt={collection.name}
-                  fill
-                  loading="eager"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
-                  <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                    {collection.count} {collection.count === 1 ? 'Pieza' : 'Piezas'}
-                  </span>
-                  <h3 className="text-2xl font-bold font-headline capitalize">{collection.name}</h3>
-                </div>
-              </div>
+              Explorar Productos
             </Link>
-          ))}
+            <Link
+              href="/collections"
+              className="inline-flex items-center justify-center rounded-full border-2 border-white/30 backdrop-blur-sm px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 hover:border-white/50 active:scale-95"
+            >
+              Ver Colecciones
+            </Link>
+          </div>
         </div>
       </section>
 

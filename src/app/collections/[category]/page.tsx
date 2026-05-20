@@ -1,7 +1,3 @@
-
-"use client";
-
-import { use } from 'react';
 import { products } from '@/lib/store';
 import ProductCard from '@/components/ProductCard';
 import { ArrowLeft } from 'lucide-react';
@@ -13,10 +9,9 @@ interface CollectionDetailPageProps {
   params: Promise<{ category: string }>;
 }
 
-export default function CollectionDetailPage({ params }: CollectionDetailPageProps) {
-  const { category } = use(params);
-  
-  // Buscamos productos que coincidan con la categoría (ignorando mayúsculas/minúsculas)
+export default async function CollectionDetailPage({ params }: CollectionDetailPageProps) {
+  const { category } = await params;
+
   const filteredProducts = products.filter(
     p => p.category.toLowerCase() === category.toLowerCase()
   );
@@ -30,9 +25,9 @@ export default function CollectionDetailPage({ params }: CollectionDetailPagePro
   return (
     <div className="space-y-12 pb-20">
       <div className="space-y-6">
-        <Button 
-          variant="outline" 
-          asChild 
+        <Button
+          variant="outline"
+          asChild
           className="rounded-full gap-2 w-fit transition-all hover:bg-primary hover:text-primary-foreground group"
         >
           <Link href="/collections">
@@ -40,7 +35,7 @@ export default function CollectionDetailPage({ params }: CollectionDetailPagePro
             Volver a Colecciones
           </Link>
         </Button>
-        
+
         <div className="border-b pb-8">
           <h1 className="text-4xl font-bold font-headline capitalize">
             Colección {categoryDisplayName}
@@ -59,7 +54,9 @@ export default function CollectionDetailPage({ params }: CollectionDetailPagePro
 
       {filteredProducts.length > 0 && (
         <div className="flex flex-col items-center justify-center py-12 border-t mt-12 text-center">
-          <p className="text-muted-foreground text-sm">Has llegado al final de la colección {categoryDisplayName.toLowerCase()}.</p>
+          <p className="text-muted-foreground text-sm">
+            Has llegado al final de la colección {categoryDisplayName.toLowerCase()}.
+          </p>
           <Link href="/collections" className="mt-4 font-bold text-primary hover:underline">
             Explorar otras colecciones
           </Link>

@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { products } from '@/lib/store';
-
 import { ChevronRight } from 'lucide-react';
 
 export default function CollectionsPage() {
