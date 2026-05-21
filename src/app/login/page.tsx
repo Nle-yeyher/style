@@ -39,15 +39,23 @@ export default function LoginPage() {
     const result = await loginUserAction(email.toLowerCase().trim(), password);
 
     if (!result.success) {
-      setError(result.error || 'Credenciales incorrectas.');
+      setError(result.error ?? 'Credenciales incorrectas.');
       setIsLoading(false);
       return;
     }
 
+    if (!result.user) {
+      setError('Credenciales incorrectas.');
+      setIsLoading(false);
+      return;
+    }
+
+    const user = result.user;
+
     // Redirigir según el rol
-    if (result.user.role === 'admin') {
+    if (user.role === 'admin') {
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('adminUser', result.user.email);
+        sessionStorage.setItem('adminUser', user.email);
         sessionStorage.removeItem('customerUser');
         sessionStorage.removeItem('customerEmail');
         sessionStorage.removeItem('userId');
@@ -55,9 +63,9 @@ export default function LoginPage() {
       router.push('/admin');
     } else {
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('customerUser', result.user.name);
-        sessionStorage.setItem('customerEmail', result.user.email);
-        sessionStorage.setItem('userId', String(result.user.id));
+        sessionStorage.setItem('customerUser', user.name);
+        sessionStorage.setItem('customerEmail', user.email);
+        sessionStorage.setItem('userId', String(user.id));
         window.dispatchEvent(new Event('stylesavvy-auth-change'));
       }
       router.push(redirectTo);

@@ -4,6 +4,17 @@ import UserModel from '@/lib/models/User';
 import OrderModel from '@/lib/models/Order';
 import { revalidatePath } from 'next/cache';
 
+type UserPayload = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'customer';
+};
+
+type LoginActionResult =
+  | { success: true; user: UserPayload }
+  | { success: false; error: string };
+
 export async function registerUserAction(data: { name: string; email: string; password: string }) {
   const existing = await UserModel.findOne({ email: data.email.toLowerCase() });
   if (existing) {
@@ -21,7 +32,7 @@ export async function registerUserAction(data: { name: string; email: string; pa
   }
 }
 
-export async function loginUserAction(email: string, password: string) {
+export async function loginUserAction(email: string, password: string): Promise<LoginActionResult> {
   try {
     const user = await UserModel.findOne({ email: email.toLowerCase() });
     if (!user) {
