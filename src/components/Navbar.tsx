@@ -62,20 +62,30 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-lg shadow-slate-900/10">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="md:hidden text-slate-900 hover:bg-slate-200">
             <Menu className="h-5 w-5" />
           </Button>
-          <Link href="/" className="text-2xl font-bold tracking-tighter text-primary font-headline">
+          <Link href="/" className="text-2xl font-bold tracking-tighter text-slate-900 font-headline">
             STYLESAVVY
           </Link>
         </div>
 
-        <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <Link href="/collections" className="transition-colors hover:text-primary">Colecciones</Link>
-          <Link href="/about" className="transition-colors hover:text-primary">Nosotros</Link>
+        <div className="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
+          <Link href="/collections" className="rounded-full px-3 py-2 transition-colors hover:text-slate-900 hover:bg-slate-100">
+            Colecciones
+          </Link>
+          <Link href="/collections/accesorios" className="rounded-full px-3 py-2 transition-colors hover:text-slate-900 hover:bg-slate-100">
+            Accesorios
+          </Link>
+          <Link href="/about" className="rounded-full px-3 py-2 transition-colors hover:text-slate-900 hover:bg-slate-100">
+            Nosotros
+          </Link>
+          <Link href="/contact" className="rounded-full px-3 py-2 transition-colors hover:text-slate-900 hover:bg-slate-100">
+            Contacto
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -93,24 +103,24 @@ export default function Navbar() {
                 type="button" 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-0 h-9 w-9 rounded-full"
+                className="absolute right-0 h-9 w-9 rounded-full text-slate-700 hover:bg-slate-200"
                 onClick={() => setIsSearchOpen(false)}
               >
                 <X className="h-4 w-4" />
               </Button>
             </form>
           ) : (
-            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+            <Button variant="ghost" size="icon" className="text-slate-700 hover:bg-slate-200" onClick={() => setIsSearchOpen(true)}>
               <Search className="h-5 w-5" />
             </Button>
           )}
 
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-slate-700 hover:bg-slate-200">
                 <ShoppingBag className="h-5 w-5" />
                 {itemCount > 0 && (
-                  <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
+                  <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-500 text-[10px] font-bold text-white">
                     {itemCount}
                   </span>
                 )}
@@ -131,7 +141,7 @@ export default function Navbar() {
                   variant="outline"
                   size="icon"
                   aria-label={`Abrir menú de usuario para ${customerName}`}
-                  className="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold uppercase text-white shadow-sm transition hover:bg-primary/90"
+                  className="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 text-sm font-bold uppercase shadow-sm transition hover:bg-slate-50"
                 >
                   {getInitials(customerName)}
                 </Button>
@@ -152,7 +162,7 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="outline" size="sm" asChild className="ml-2">
+            <Button variant="outline" size="sm" asChild className="ml-2 border-slate-300 text-slate-900 hover:bg-slate-100">
               <Link href="/login">Iniciar Sesión</Link>
             </Button>
           )}

@@ -8,11 +8,11 @@ export default function AboutPage() {
       <section className="relative h-[60vh] overflow-hidden rounded-3xl bg-primary flex items-center justify-center text-center text-white px-6">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://picsum.photos/seed/about-hero/1200/800"
-            alt="StyleSavvy Studio"
+            src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80"
+            alt="Ropa y accesorios modernos"
             fill
             sizes="100vw"
-            className="object-cover opacity-30 grayscale"
+            className="object-cover opacity-30"
             data-ai-hint="fashion studio"
           />
         </div>
@@ -52,12 +52,12 @@ export default function AboutPage() {
         </div>
         <div className="relative aspect-square overflow-hidden rounded-2xl shadow-xl">
           <Image
-            src="https://picsum.photos/seed/philosophy/800/800"
-            alt="Philosophy"
+            src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80"
+            alt="Ropa moderna colgada"
             fill
             sizes="100vw"
             className="object-cover"
-            data-ai-hint="minimalist clothing"
+            data-ai-hint="fashion wardrobe"
           />
         </div>
       </section>

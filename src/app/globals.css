@@ -3,8 +3,8 @@
 
 @layer base {
   :root {
-    --background: 210 15% 94%;
-    /* #EEF0F3 */
+    --background: 204 24% 86%;
+    /* #cfdbe7 */
     --foreground: 224 28% 15%;
     --card: 0 0% 100%;
     --card-foreground: 224 28% 15%;
@@ -61,7 +61,13 @@
     @apply border-border;
   }
 
+  html,
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  body {
+    @apply text-foreground;
   }
 }
