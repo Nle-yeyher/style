@@ -58,8 +58,10 @@ export default function ProfilePage() {
         return;
       }
 
-      setUser(userResult.user);
-      setName(userResult.user.name);
+      if (userResult.user) {
+        setUser(userResult.user);
+        setName(userResult.user.name);
+      }
 
       const ordersResult = await getOrdersAction(userId);
       if (ordersResult.success) {

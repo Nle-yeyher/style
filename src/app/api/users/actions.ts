@@ -15,6 +15,10 @@ type LoginActionResult =
   | { success: true; user: UserPayload }
   | { success: false; error: string };
 
+type GetUserActionResult =
+  | { success: true; user: UserPayload }
+  | { success: false; error: string };
+
 export async function registerUserAction(data: { name: string; email: string; password: string }) {
   const existing = await UserModel.findOne({ email: data.email.toLowerCase() });
   if (existing) {
@@ -26,7 +30,7 @@ export async function registerUserAction(data: { name: string; email: string; pa
       email: data.email.toLowerCase(),
       password: data.password,
     });
-    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    return { success: true, user: { id: String(user.id), name: user.name, email: user.email, role: user.role } };
   } catch (error) {
     return { success: false, error: 'Error al registrar usuario' };
   }
@@ -55,11 +59,11 @@ export async function loginUserAction(email: string, password: string): Promise<
   }
 }
 
-export async function getUserAction(userId: string) {
+export async function getUserAction(userId: string): Promise<GetUserActionResult> {
   try {
     const user = await UserModel.findByIdLean(userId);
     if (!user) return { success: false, error: 'Usuario no encontrado' };
-    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    return { success: true, user: { id: String(user.id), name: user.name, email: user.email, role: user.role } };
   } catch (error) {
     return { success: false, error: 'Error al obtener usuario' };
   }
@@ -80,7 +84,7 @@ export async function changePasswordAction(userId: string, currentPassword: stri
   }
 }
 
-export async function updateUserAction(userId: string, data: { name: string }) {
+export async function updateUserAction(userId: string, data: { name: string }): Promise<GetUserActionResult> {
   try {
     const user = await UserModel.findById(userId);
     if (!user) return { success: false, error: 'Usuario no encontrado' };
@@ -88,24 +92,38 @@ export async function updateUserAction(userId: string, data: { name: string }) {
     user.updatedAt = new Date();
     await user.save();
     revalidatePath('/profile');
-    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    return { success: true, user: { id: String(user.id), name: user.name, email: user.email, role: user.role } };
   } catch (error) {
     return { success: false, error: 'Error al actualizar usuario' };
   }
 }
 
-export async function getOrdersAction(userId: string) {
+type OrdersActionResult =
+  | {
+      success: true;
+      orders: {
+        id: string;
+        orderNumber: string;
+        items: Array<{ productId: string; name: string; price: number; quantity: number; size?: string }>;
+        total: number;
+        status: 'completed' | 'pending' | 'failed';
+        date: string;
+      }[];
+    }
+  | { success: false; error: string };
+
+export async function getOrdersAction(userId: string): Promise<OrdersActionResult> {
   try {
     const orders = await (await OrderModel.find({ userId: Number(userId) })).lean();
     return {
       success: true,
       orders: orders.map((order) => ({
-        id: order.id,
+        id: String(order.id),
         orderNumber: order.orderNumber,
         items: order.items,
         total: order.total,
-        status: order.status,
-        date: order.createdAt,
+        status: order.status as 'completed' | 'pending' | 'failed',
+        date: order.createdAt ? order.createdAt.toISOString() : new Date().toISOString(),
       })),
     };
   } catch (error) {

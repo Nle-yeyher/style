@@ -22,7 +22,7 @@ export default function OrdersPage() {
       const userId = sessionStorage.getItem('userId');
       if (userId) {
         const result = await getOrdersAction(userId);
-        if (result.success) {
+        if (result.success && result.orders) {
           setOrders(result.orders);
           return;
         }
