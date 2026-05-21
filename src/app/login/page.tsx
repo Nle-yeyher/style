@@ -13,10 +13,11 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') ?? '/';
 
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPassword, setCustomerPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [customerUser, setCustomerUser] = useState<string | null>(null);
-  const [customerError, setCustomerError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -24,45 +25,48 @@ export default function LoginPage() {
     setCustomerUser(storedCustomer);
   }, []);
 
-  const handleCustomerLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setCustomerError(null);
+    setError(null);
+    setIsLoading(true);
 
-    if (!customerEmail.trim() || !customerPassword.trim()) {
-      setCustomerError('Completa email y contraseña para iniciar sesión.');
+    if (!email.trim() || !password.trim()) {
+      setError('Completa email y contraseña.');
+      setIsLoading(false);
       return;
     }
 
-    const emailLower = customerEmail.toLowerCase().trim();
-    const isAdmin = emailLower === 'admin@stylesavvy.com' && customerPassword === 'admin123';
+    const result = await loginUserAction(email.toLowerCase().trim(), password);
 
-    if (isAdmin) {
+    if (!result.success) {
+      setError(result.error || 'Credenciales incorrectas.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Redirigir según el rol
+    if (result.user.role === 'admin') {
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('adminUser', emailLower);
+        sessionStorage.setItem('adminUser', result.user.email);
         sessionStorage.removeItem('customerUser');
         sessionStorage.removeItem('customerEmail');
+        sessionStorage.removeItem('userId');
       }
       router.push('/admin');
-      return;
+    } else {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('customerUser', result.user.name);
+        sessionStorage.setItem('customerEmail', result.user.email);
+        sessionStorage.setItem('userId', String(result.user.id));
+        window.dispatchEvent(new Event('stylesavvy-auth-change'));
+      }
+      router.push(redirectTo);
     }
 
-    const result = await loginUserAction(emailLower, customerPassword);
-    if (!result.success) {
-      setCustomerError(result.error || 'No existe una cuenta con ese email. Regístrate primero.');
-      return;
-    }
-
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('customerUser', result.user.name);
-      sessionStorage.setItem('customerEmail', result.user.email);
-      sessionStorage.setItem('userId', result.user.id);
-      window.dispatchEvent(new Event('stylesavvy-auth-change'));
-    }
-
-    router.push(redirectTo);
+    setIsLoading(false);
   };
 
-  const handleCustomerLogout = () => {
+  const handleLogout = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('customerUser');
       sessionStorage.removeItem('customerEmail');
@@ -70,9 +74,9 @@ export default function LoginPage() {
       window.dispatchEvent(new Event('stylesavvy-auth-change'));
     }
     setCustomerUser(null);
-    setCustomerEmail('');
-    setCustomerPassword('');
-    setCustomerError(null);
+    setEmail('');
+    setPassword('');
+    setError(null);
   };
 
   return (
@@ -80,8 +84,10 @@ export default function LoginPage() {
       <div className="mx-auto max-w-md">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Ingresar datos</CardTitle>
-            <p className="text-sm text-muted-foreground">Ingresa tu email y contraseña para continuar. Se verificará automáticamente si eres cliente o administrador.</p>
+            <CardTitle>Iniciar Sesión</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Ingresa tu email y contraseña. El sistema detectará automáticamente si eres cliente o administrador.
+            </p>
           </CardHeader>
           <CardContent>
             {customerUser ? (
@@ -89,40 +95,43 @@ export default function LoginPage() {
                 <p className="text-lg font-medium">Bienvenido, {customerUser}.</p>
                 <Button type="button" onClick={() => router.push('/profile')}>Mi cuenta</Button>
                 <Button type="button" variant="outline" onClick={() => router.push('/')}>Seguir comprando</Button>
-                <Button type="button" variant="outline" onClick={handleCustomerLogout}>Cerrar sesión</Button>
+                <Button type="button" variant="outline" onClick={handleLogout}>Cerrar sesión</Button>
               </div>
             ) : (
-              <form onSubmit={handleCustomerLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="customerEmail">Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="customerEmail"
+                    id="email"
                     type="email"
-                    value={customerEmail}
-                    onChange={(event) => setCustomerEmail(event.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="customerPassword">Contraseña</Label>
+                  <Label htmlFor="password">Contraseña</Label>
                   <Input
-                    id="customerPassword"
+                    id="password"
                     type="password"
-                    value={customerPassword}
-                    onChange={(event) => setCustomerPassword(event.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
-                {customerError ? <p className="text-sm text-destructive">{customerError}</p> : null}
-                <Button type="submit">Iniciar Sesión</Button>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Verificando...' : 'Iniciar Sesión'}
+                </Button>
                 <p className="text-xs text-muted-foreground">
-                  ¿No tienes cuenta? <a href="/register" className="text-primary underline">Regístrate aquí</a>.
+                  ¿No tienes cuenta?{' '}
+                  <a href="/register" className="text-primary underline">Regístrate aquí</a>.
                 </p>
               </form>
             )}
           </CardContent>
         </Card>
-
       </div>
     </div>
   );

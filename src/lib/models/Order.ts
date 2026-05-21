@@ -6,7 +6,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  size: string;
+  size?: string;
 }
 
 export interface Order {
@@ -65,7 +65,7 @@ class OrderDocument {
       for (const item of this.items) {
         await conn.execute(
           'INSERT INTO order_items (order_id, product_id, name, price, quantity, size) VALUES (?, ?, ?, ?, ?, ?)',
-          [this.id, item.productId, item.name, item.price, item.quantity, item.size]
+          [this.id, item.productId, item.name, item.price, item.quantity, item.size ?? null]
         );
       }
 

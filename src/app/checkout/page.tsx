@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -11,9 +10,7 @@ import { Loader2, CreditCard, ShieldCheck, Landmark, Wallet, QrCode, Building2, 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateInvoice } from '@/ai/flows/generate-invoice-flow';
-import { saveOrder } from '@/lib/store';
 import { saveOrderAction, updateProductStockAction } from '@/app/api/users/actions';
-import { Order } from '@/lib/types';
 
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
@@ -115,13 +112,10 @@ export default function CheckoutPage() {
     setProcessingStatus('Iniciando proceso de pago...');
     
     try {
-      // Procesar pago simulado
       setProcessingStatus('Procesando pago...');
       const paymentResponse = await fetch('/api/payment', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           paymentMethod,
           amount: total,
@@ -134,9 +128,7 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!paymentResponse.ok) {
-        throw new Error('Error en el pago');
-      }
+      if (!paymentResponse.ok) throw new Error('Error en el pago');
 
       const paymentResult = await paymentResponse.json();
       if (!paymentResult.success) {
@@ -148,7 +140,6 @@ export default function CheckoutPage() {
       setProcessingStatus('Generando Factura...');
       const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       
-      // Generar factura con IA
       const invoice = await generateInvoice({
         orderNumber: `SS-${orderNumber}`,
         customerName: `${formData.firstName} ${formData.lastName}`,
@@ -163,7 +154,7 @@ export default function CheckoutPage() {
         date: new Date().toLocaleDateString('es-AR')
       });
 
-      const orderData: any = {
+      const orderData = {
         id: `SS-${orderNumber}`,
         date: new Date().toISOString(),
         total: total,
@@ -184,10 +175,9 @@ export default function CheckoutPage() {
             orderNumber: orderData.id,
             items: orderData.items,
             total: orderData.total,
-            status: orderData.status || 'completed',
+            status: orderData.status,
           });
 
-          // Actualizar stock del producto
           await updateProductStockAction(
             cart.map(item => ({
               productId: item.id,
@@ -197,22 +187,20 @@ export default function CheckoutPage() {
           );
         } catch (saveError) {
           console.error('Error saving order to DB:', saveError);
-          saveOrder(orderData as Order);
         }
       } else {
-        saveOrder(orderData as Order);
+        console.warn('Usuario no autenticado, pedido no guardado en DB');
       }
 
       setProcessingStatus('Finalizando pedido...');
-      // Simular retraso de procesamiento y envío de email
       setTimeout(() => {
         setIsProcessing(false);
         clearCart();
-        // Guardar la factura en sessionStorage para mostrarla en la página de éxito
         sessionStorage.setItem('last_invoice', JSON.stringify(invoice));
         sessionStorage.setItem('customer_email', formData.email);
         router.push(`/checkout/success?order=${orderNumber}`);
       }, 2000);
+
     } catch (error) {
       console.error("Error en el checkout:", error);
       setIsProcessing(false);
@@ -220,21 +208,13 @@ export default function CheckoutPage() {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       
       if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable') || errorMessage.includes('high demand')) {
-        setPaymentError(
-          'Los servidores de generación de facturas están sobrecargados. Por favor, intenta de nuevo en unos momentos. El sistema reintentar automáticamente.'
-        );
+        setPaymentError('Los servidores de generación de facturas están sobrecargados. Por favor, intenta de nuevo en unos momentos.');
       } else if (errorMessage.includes('Error al generar')) {
-        setPaymentError(
-          'Error al generar tu factura. Por favor intenta de nuevo o contacta soporte.'
-        );
+        setPaymentError('Error al generar tu factura. Por favor intenta de nuevo o contacta soporte.');
       } else if (errorMessage.includes('pago')) {
-        setPaymentError(
-          'Error en el procesamiento del pago. Verifica tus datos e intenta de nuevo.'
-        );
+        setPaymentError('Error en el procesamiento del pago. Verifica tus datos e intenta de nuevo.');
       } else {
-        setPaymentError(
-          `Ocurrió un error: ${errorMessage}. Por favor intenta de nuevo.`
-        );
+        setPaymentError(`Ocurrió un error: ${errorMessage}. Por favor intenta de nuevo.`);
       }
     }
   };
@@ -249,13 +229,11 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-10">
           <form id="checkout-form" onSubmit={handleCheckout} className="space-y-10">
-            {/* Sección de Envío */}
             <section className="space-y-6">
               <div className="flex items-center gap-2 border-b pb-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">1</div>
                 <h3 className="text-lg font-bold uppercase tracking-tight">Detalles de Envío</h3>
               </div>
-              
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nombre</Label>
@@ -284,44 +262,30 @@ export default function CheckoutPage() {
               </div>
             </section>
 
-            {/* Sección de Pago */}
             <section className="space-y-6">
               <div className="flex items-center gap-2 border-b pb-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</div>
                 <h3 className="text-lg font-bold uppercase tracking-tight">Método de Pago</h3>
               </div>
 
-              <RadioGroup 
-                defaultValue="card" 
-                onValueChange={setPaymentMethod}
-                className="grid grid-cols-1 gap-4 sm:grid-cols-3"
-              >
+              <RadioGroup defaultValue="card" onValueChange={setPaymentMethod} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                   <RadioGroupItem value="card" id="card" className="peer sr-only" />
-                  <Label
-                    htmlFor="card"
-                    className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                  >
+                  <Label htmlFor="card" className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
                     <CreditCard className="mb-3 h-6 w-6" />
                     <span className="text-sm font-bold">Tarjeta</span>
                   </Label>
                 </div>
                 <div>
                   <RadioGroupItem value="transfer" id="transfer" className="peer sr-only" />
-                  <Label
-                    htmlFor="transfer"
-                    className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                  >
+                  <Label htmlFor="transfer" className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
                     <Landmark className="mb-3 h-6 w-6" />
                     <span className="text-sm font-bold">Transferencia</span>
                   </Label>
                 </div>
                 <div>
                   <RadioGroupItem value="wallet" id="wallet" className="peer sr-only" />
-                  <Label
-                    htmlFor="wallet"
-                    className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                  >
+                  <Label htmlFor="wallet" className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
                     <Wallet className="mb-3 h-6 w-6" />
                     <span className="text-sm font-bold">Billetera Virtual</span>
                   </Label>
@@ -334,39 +298,18 @@ export default function CheckoutPage() {
                     <div className="space-y-2">
                       <Label htmlFor="cardNumber">Número de Tarjeta</Label>
                       <div className="relative">
-                        <Input 
-                          id="cardNumber" 
-                          placeholder="0000 0000 0000 0000" 
-                          className="pl-10 font-mono tracking-widest"
-                          value={cardNumber}
-                          onChange={handleCardNumberChange}
-                          required 
-                        />
+                        <Input id="cardNumber" placeholder="0000 0000 0000 0000" className="pl-10 font-mono tracking-widest" value={cardNumber} onChange={handleCardNumberChange} required />
                         <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="expiry">Vencimiento (MM/AA)</Label>
-                        <Input 
-                          id="expiry" 
-                          placeholder="MM/AA" 
-                          className="font-mono text-center tracking-widest"
-                          value={cardExpiry}
-                          onChange={handleExpiryChange}
-                          required 
-                        />
+                        <Input id="expiry" placeholder="MM/AA" className="font-mono text-center tracking-widest" value={cardExpiry} onChange={handleExpiryChange} required />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="cvv">CVV</Label>
-                        <Input 
-                          id="cvv" 
-                          placeholder="123" 
-                          className="font-mono text-center tracking-widest"
-                          value={cardCvv}
-                          onChange={handleCvvChange}
-                          required 
-                        />
+                        <Input id="cvv" placeholder="123" className="font-mono text-center tracking-widest" value={cardCvv} onChange={handleCvvChange} required />
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -386,35 +329,16 @@ export default function CheckoutPage() {
                         Datos Bancarios
                       </h4>
                       <div className="space-y-2 rounded-lg bg-background p-4 border text-sm font-mono">
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="text-muted-foreground">Banco:</span>
-                          <strong>Banco Ciudad</strong>
-                        </div>
-                        <div className="flex justify-between border-b pb-2 pt-1">
-                          <span className="text-muted-foreground">Titular:</span>
-                          <strong>StyleSavvy SA</strong>
-                        </div>
-                        <div className="flex justify-between border-b pb-2 pt-1">
-                          <span className="text-muted-foreground">CBU:</span>
-                          <strong>0000003100000000000123</strong>
-                        </div>
-                        <div className="flex justify-between pt-1">
-                          <span className="text-muted-foreground">Alias:</span>
-                          <strong>STYLESAVVY.MODA</strong>
-                        </div>
+                        <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Banco:</span><strong>Banco Ciudad</strong></div>
+                        <div className="flex justify-between border-b pb-2 pt-1"><span className="text-muted-foreground">Titular:</span><strong>StyleSavvy SA</strong></div>
+                        <div className="flex justify-between border-b pb-2 pt-1"><span className="text-muted-foreground">CBU:</span><strong>0000003100000000000123</strong></div>
+                        <div className="flex justify-between pt-1"><span className="text-muted-foreground">Alias:</span><strong>STYLESAVVY.MODA</strong></div>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <Label htmlFor="transferRef">Número de Referencia / Comprobante</Label>
                       <div className="relative">
-                        <Input 
-                          id="transferRef" 
-                          placeholder="Ingresa el número de operación" 
-                          className="pl-10"
-                          value={transferRef}
-                          onChange={(e) => setTransferRef(e.target.value)}
-                          required={paymentMethod === 'transfer'} 
-                        />
+                        <Input id="transferRef" placeholder="Ingresa el número de operación" className="pl-10" value={transferRef} onChange={(e) => setTransferRef(e.target.value)} required={paymentMethod === 'transfer'} />
                         <Upload className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       </div>
                       <p className="text-xs text-muted-foreground">Para agilizar la verificación, anota el número de ticket y guárdalo.</p>
@@ -435,9 +359,7 @@ export default function CheckoutPage() {
                         Abre tu billetera virtual (MercadoPago, MODO, etc.) y escanea el código para efectuar el pago de <strong>${total.toLocaleString('es-CO')}</strong>.
                       </p>
                     </div>
-                    <p className="text-xs bg-primary/10 text-primary font-bold py-2 px-4 rounded-full">
-                      El pago se acreditará instantáneamente.
-                    </p>
+                    <p className="text-xs bg-primary/10 text-primary font-bold py-2 px-4 rounded-full">El pago se acreditará instantáneamente.</p>
                   </CardContent>
                 </Card>
               )}
@@ -449,16 +371,9 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <Button 
-              type="submit"
-              className="w-full bg-primary py-8 text-lg font-bold transition-all" 
-              disabled={isProcessing}
-            >
+            <Button type="submit" className="w-full bg-primary py-8 text-lg font-bold transition-all" disabled={isProcessing}>
               {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {processingStatus}
-                </>
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" />{processingStatus}</>
               ) : (
                 <>Finalizar Pago ${total.toLocaleString('es-CO')}</>
               )}
@@ -471,7 +386,6 @@ export default function CheckoutPage() {
           </form>
         </div>
 
-        {/* Resumen del Lado Derecho */}
         <div className="lg:col-span-1">
           <div className="sticky top-24 space-y-6">
             <Card className="border-none bg-card shadow-lg">
@@ -487,7 +401,6 @@ export default function CheckoutPage() {
                       <span className="font-bold">${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
-                  
                   <div className="space-y-2 pt-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
@@ -500,9 +413,7 @@ export default function CheckoutPage() {
                     <div className="border-t pt-4">
                       <div className="flex items-end justify-between">
                         <span className="text-base font-bold">Total</span>
-                        <div className="text-right">
-                          <span className="block text-2xl font-bold text-primary">${total.toLocaleString('es-CO')}</span>
-                        </div>
+                        <span className="block text-2xl font-bold text-primary">${total.toLocaleString('es-CO')}</span>
                       </div>
                     </div>
                   </div>

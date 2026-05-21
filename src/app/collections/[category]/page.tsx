@@ -1,4 +1,5 @@
-import { products } from '@/lib/store';
+import ProductModel from '@/lib/models/Product';
+import { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -12,7 +13,9 @@ interface CollectionDetailPageProps {
 export default async function CollectionDetailPage({ params }: CollectionDetailPageProps) {
   const { category } = await params;
 
-  const filteredProducts = products.filter(
+  const allProducts: Product[] = await (await ProductModel.find({})).lean() as any[];
+
+  const filteredProducts = allProducts.filter(
     p => p.category.toLowerCase() === category.toLowerCase()
   );
 

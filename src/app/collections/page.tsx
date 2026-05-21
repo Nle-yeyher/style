@@ -1,13 +1,14 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { products } from '@/lib/store';
+import ProductModel from '@/lib/models/Product';
+import { Product } from '@/lib/types';
 import { ChevronRight } from 'lucide-react';
 
-export default function CollectionsPage() {
-  // Extraemos categorías únicas y una imagen representativa
+export default async function CollectionsPage() {
+  const products: Product[] = await (await ProductModel.find({})).lean() as any[];
+
   const categories = Array.from(new Set(products.map(p => p.category)));
-  
+
   const collections = categories.map(category => {
     const representativeProduct = products.find(p => p.category === category);
     return {
@@ -29,8 +30,8 @@ export default function CollectionsPage() {
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {collections.map((collection) => (
-          <Link 
-            key={collection.name} 
+          <Link
+            key={collection.name}
             href={`/collections/${collection.slug}`}
             className="group block overflow-hidden rounded-2xl bg-muted"
           >
@@ -62,8 +63,8 @@ export default function CollectionsPage() {
         <h2 className="text-2xl font-bold font-headline">¿Buscas algo específico?</h2>
         <p className="mt-2 text-primary-foreground/80">Usa nuestro buscador para encontrar exactamente lo que necesitas.</p>
         <div className="mt-8 flex justify-center">
-          <Link 
-            href="/search" 
+          <Link
+            href="/search"
             className="rounded-full bg-accent px-8 py-3 text-sm font-bold transition-transform hover:scale-105"
           >
             Ver Todo el Catálogo

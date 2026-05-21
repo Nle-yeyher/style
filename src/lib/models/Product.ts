@@ -14,16 +14,6 @@ export interface Product {
   createdAt?: Date;
 }
 
-// ── Helpers internos ──────────────────────────────────────────
-
-async function getSizeStock(productId: number) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT size, stock, sold FROM product_size_stock WHERE product_id = ?',
-    [productId]
-  );
-  return rows as { size: string; stock: number; sold: number }[];
-}
-
 function rowToProduct(row: RowDataPacket, sizeStock: { size: string; stock: number; sold: number }[]): Product {
   return {
     id: row.id,
@@ -39,20 +29,28 @@ function rowToProduct(row: RowDataPacket, sizeStock: { size: string; stock: numb
   };
 }
 
-// ── API pública (misma interfaz que Mongoose) ─────────────────
-
 const ProductModel = {
 
   async find(_filter = {}): Promise<{ lean: () => Promise<Product[]> }> {
     return {
       lean: async () => {
         const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM products ORDER BY created_at DESC');
-        return Promise.all(
-          (rows as RowDataPacket[]).map(async (row) => {
-            const sizeStock = await getSizeStock(row.id);
-            return rowToProduct(row, sizeStock);
-          })
+        const productIds = (rows as RowDataPacket[]).map(r => r.id);
+        if (!productIds.length) return [];
+
+        // Una sola query para todo el stock en vez de 68 queries
+        const [stockRows] = await pool.query<RowDataPacket[]>(
+          `SELECT * FROM product_size_stock WHERE product_id IN (${productIds.map(() => '?').join(',')})`,
+          productIds
         );
+
+        const stockMap: Record<number, { size: string; stock: number; sold: number }[]> = {};
+        for (const s of stockRows as RowDataPacket[]) {
+          if (!stockMap[s.product_id]) stockMap[s.product_id] = [];
+          stockMap[s.product_id].push({ size: s.size, stock: s.stock, sold: s.sold });
+        }
+
+        return (rows as RowDataPacket[]).map(row => rowToProduct(row, stockMap[row.id] || []));
       },
     };
   },
@@ -63,8 +61,11 @@ const ProductModel = {
         const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM products WHERE id = ?', [id]);
         if (!rows.length) return null;
         const row = rows[0];
-        const sizeStock = await getSizeStock(row.id);
-        return rowToProduct(row, sizeStock);
+        const [stockRows] = await pool.query<RowDataPacket[]>(
+          'SELECT size, stock, sold FROM product_size_stock WHERE product_id = ?',
+          [row.id]
+        );
+        return rowToProduct(row, stockRows as { size: string; stock: number; sold: number }[]);
       },
     };
   },
@@ -117,7 +118,6 @@ const ProductModel = {
     try {
       await conn.beginTransaction();
 
-      // Actualizar campos del producto (excluir sizeStock)
       const { sizeStock, sizes, suggestions_ids, ...fields } = data;
 
       const colMap: Record<string, string> = {
@@ -143,7 +143,6 @@ const ProductModel = {
         values.push(JSON.stringify(suggestions_ids));
       }
 
-      // Soporte para $inc de sizeStock (usado al procesar compras)
       if (data.$inc) {
         const inc = data.$inc as Record<string, number>;
         const arrayFilters: { 'elem.size': string }[] = data.arrayFilters || [];
@@ -160,7 +159,6 @@ const ProductModel = {
           );
         }
       } else if (sizeStock) {
-        // Reemplazar sizeStock completo
         await conn.execute('DELETE FROM product_size_stock WHERE product_id = ?', [id]);
         for (const ss of sizeStock) {
           await conn.execute(
@@ -189,7 +187,6 @@ const ProductModel = {
     await pool.execute('DELETE FROM products WHERE id = ?', [id]);
   },
 
-  // Crear un producto individual (equivalente a new ProductModel(data).save())
   async create(data: Omit<Product, 'id'>): Promise<Product> {
     const results = await ProductModel.insertMany([data]);
     return results[0];

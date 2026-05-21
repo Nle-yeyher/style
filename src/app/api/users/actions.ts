@@ -9,16 +9,14 @@ export async function registerUserAction(data: { name: string; email: string; pa
   if (existing) {
     return { success: false, error: 'El email ya está registrado' };
   }
-
   try {
     const user = await UserModel.create({
       name: data.name,
       email: data.email.toLowerCase(),
       password: data.password,
     });
-    return { success: true, user: { id: user.id, name: user.name, email: user.email } };
+    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
   } catch (error) {
-    console.error('Error registering user:', error);
     return { success: false, error: 'Error al registrar usuario' };
   }
 }
@@ -29,14 +27,19 @@ export async function loginUserAction(email: string, password: string) {
     if (!user) {
       return { success: false, error: 'Usuario no encontrado' };
     }
-
     if (user.password !== password) {
       return { success: false, error: 'Contraseña incorrecta' };
     }
-
-    return { success: true, user: { id: user.id, name: user.name, email: user.email } };
+    return {
+      success: true,
+      user: {
+        id: String(user.id),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
   } catch (error) {
-    console.error('Error logging in:', error);
     return { success: false, error: 'Error al iniciar sesión' };
   }
 }
@@ -44,12 +47,9 @@ export async function loginUserAction(email: string, password: string) {
 export async function getUserAction(userId: string) {
   try {
     const user = await UserModel.findByIdLean(userId);
-    if (!user) {
-      return { success: false, error: 'Usuario no encontrado' };
-    }
-    return { success: true, user: { id: user.id, name: user.name, email: user.email } };
+    if (!user) return { success: false, error: 'Usuario no encontrado' };
+    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
   } catch (error) {
-    console.error('Error getting user:', error);
     return { success: false, error: 'Error al obtener usuario' };
   }
 }
@@ -57,22 +57,14 @@ export async function getUserAction(userId: string) {
 export async function changePasswordAction(userId: string, currentPassword: string, newPassword: string) {
   try {
     const user = await UserModel.findById(userId);
-    if (!user) {
-      return { success: false, error: 'Usuario no encontrado' };
-    }
-
-    if (user.password !== currentPassword) {
-      return { success: false, error: 'Contraseña actual incorrecta' };
-    }
-
+    if (!user) return { success: false, error: 'Usuario no encontrado' };
+    if (user.password !== currentPassword) return { success: false, error: 'Contraseña actual incorrecta' };
     user.password  = newPassword;
     user.updatedAt = new Date();
     await user.save();
-
     revalidatePath('/profile');
     return { success: true };
   } catch (error) {
-    console.error('Error changing password:', error);
     return { success: false, error: 'Error al cambiar contraseña' };
   }
 }
@@ -80,21 +72,13 @@ export async function changePasswordAction(userId: string, currentPassword: stri
 export async function updateUserAction(userId: string, data: { name: string }) {
   try {
     const user = await UserModel.findById(userId);
-    if (!user) {
-      return { success: false, error: 'Usuario no encontrado' };
-    }
-
+    if (!user) return { success: false, error: 'Usuario no encontrado' };
     user.name      = data.name;
     user.updatedAt = new Date();
     await user.save();
-
     revalidatePath('/profile');
-    return {
-      success: true,
-      user: { id: user.id, name: user.name, email: user.email },
-    };
+    return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
   } catch (error) {
-    console.error('Error updating user:', error);
     return { success: false, error: 'Error al actualizar usuario' };
   }
 }
@@ -114,7 +98,6 @@ export async function getOrdersAction(userId: string) {
       })),
     };
   } catch (error) {
-    console.error('Error getting orders:', error);
     return { success: false, error: 'Error al obtener pedidos' };
   }
 }
@@ -140,11 +123,9 @@ export async function updateProductStockAction(
   items: Array<{ productId: string; size?: string; quantity: number }>
 ) {
   const { default: ProductModel } = await import('@/lib/models/Product');
-
   try {
     for (const item of items) {
       if (!item.size) continue;
-
       await ProductModel.findByIdAndUpdate(item.productId, {
         $inc: {
           'sizeStock.$[elem].stock': -item.quantity,
@@ -153,11 +134,9 @@ export async function updateProductStockAction(
         arrayFilters: [{ 'elem.size': item.size }],
       });
     }
-
     revalidatePath('/');
     return { success: true };
   } catch (error) {
-    console.error('Error updating stock:', error);
     return { success: false, error: 'Error al actualizar stock' };
   }
 }

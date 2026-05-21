@@ -5,7 +5,7 @@ import Link from 'next/link';
 import CompleteTheLook from '@/components/CompleteTheLook';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Product } from '@/lib/types';
-import dbConnect from '@/lib/mysql';
+import { dbConnect } from '@/lib/mysql';
 import ProductModel from '@/lib/models/Product';
 import { notFound } from 'next/navigation';
 
@@ -19,9 +19,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   let productDoc = null;
   try {
-    productDoc = await ProductModel.findById(id).lean();
+    const result = await ProductModel.findById(id);
+    productDoc = await result.lean();
   } catch(e) {
-    // invalid id format for mongodb likely
+    // invalid id format or DB error
   }
 
   if (!productDoc) {

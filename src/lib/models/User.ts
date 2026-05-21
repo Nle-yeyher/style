@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   password: string;
+  role: 'admin' | 'customer';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -16,24 +17,26 @@ function rowToUser(row: RowDataPacket): User {
     name: row.name,
     email: row.email,
     password: row.password,
+    role: row.role || 'customer',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-// Clase que imita la interfaz de un documento Mongoose
 class UserDocument {
   id: number;
   name: string;
   email: string;
   password: string;
+  role: 'admin' | 'customer';
   updatedAt: Date;
 
   constructor(data: User) {
-    this.id    = data.id;
-    this.name  = data.name;
-    this.email = data.email;
+    this.id       = data.id;
+    this.name     = data.name;
+    this.email    = data.email;
     this.password = data.password;
+    this.role     = data.role || 'customer';
     this.updatedAt = data.updatedAt || new Date();
   }
 
@@ -68,7 +71,6 @@ const UserModel = {
     return new UserDocument(rowToUser(rows[0]));
   },
 
-  // lean() devuelve el objeto plano (sin métodos save())
   async findByIdLean(id: string | number): Promise<User | null> {
     const [rows] = await pool.query<RowDataPacket[]>(
       'SELECT * FROM users WHERE id = ? LIMIT 1',
@@ -78,13 +80,12 @@ const UserModel = {
     return rowToUser(rows[0]);
   },
 
-  // Equivalente a new UserModel(data).save()
   async create(data: { name: string; email: string; password: string }): Promise<UserDocument> {
     const [result] = await pool.execute<ResultSetHeader>(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [data.name, data.email, data.password]
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [data.name, data.email, data.password, 'customer']
     );
-    const inserted: User = { id: result.insertId, ...data };
+    const inserted: User = { id: result.insertId, role: 'customer', ...data };
     return new UserDocument(inserted);
   },
 };
