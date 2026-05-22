@@ -7,7 +7,10 @@ const pool = mysql.createPool({
   database: process.env.MYSQL_DATABASE || 'style_db',
   port: 3306,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 5,      // ← máximo 5 conexiones
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
 });
 
 // Compatibilidad con el patrón dbConnect() de Mongoose
