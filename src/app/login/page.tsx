@@ -6,7 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { loginUserAction } from '@/app/api/users/actions';
+
+
+async function loginUserAction(email: string, password: string) {
+  const res = await fetch('/api/users/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  const data = await res.json()
+  if (!data.ok) return { success: false, error: data.error }
+  return { success: true, user: data.data }
+}
 
 export default function LoginPage() {
   const router = useRouter();

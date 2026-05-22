@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { registerUserAction } from '@/app/api/users/actions';
+import { registerUserAction } from '@/lib/actions/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,11 +38,11 @@ export default function RegisterPage() {
     }
 
     try {
-      const result = await registerUserAction({
-        name: name.trim(),
-        email: email.trim(),
+      const result = await registerUserAction(
+        name.trim(),
+        email.trim(),
         password,
-      });
+      );
 
       if (!result.success) {
         setError(result.error || 'Error al registrar');
@@ -53,7 +53,7 @@ export default function RegisterPage() {
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('customerUser', result.user!.name);
         sessionStorage.setItem('customerEmail', result.user!.email);
-        sessionStorage.setItem('userId', result.user!.id);
+        sessionStorage.setItem('userId', String(result.user!.id));
         window.dispatchEvent(new Event('stylesavvy-auth-change'));
       }
 

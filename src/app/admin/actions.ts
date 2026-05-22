@@ -1,8 +1,5 @@
 "use server";
 
-import ProductModel from '@/lib/models/Product';
-import UserModel from '@/lib/models/User';
-import OrderModel from '@/lib/models/Order';
 import pool from '@/lib/mysql';
 import { RowDataPacket } from 'mysql2';
 import { revalidatePath } from 'next/cache';
@@ -10,51 +7,65 @@ import { revalidatePath } from 'next/cache';
 // ── Productos ─────────────────────────────────────────────────
 
 export async function getProductsAction() {
-  const docs = await (await ProductModel.find({})).lean();
-  return docs.map((doc) => ({
-    id: doc.id,
-    name: doc.name,
-    category: doc.category,
-    price: doc.price,
-    description: doc.description,
-    imageUrl: doc.imageUrl,
-    sizes: doc.sizes || [],
-    sizeStock: doc.sizeStock || [],
-    suggestions_ids: doc.suggestions_ids || [],
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT * FROM products ORDER BY id DESC'
+  );
+
+  const products = await Promise.all((rows as RowDataPacket[]).map(async (row) => {
+    const [stockRows] = await pool.query<RowDataPacket[]>(
+      'SELECT size, stock, sold FROM product_size_stock WHERE product_id = ? ORDER BY size',
+      [row.id]
+    );
+    return {
+      id:              String(row.id),
+      name:            row.name,
+      category:        row.category,
+      price:           Number(row.price),
+      description:     row.description,
+      imageUrl:        row.image_url,
+      sizes:           row.sizes ? JSON.parse(row.sizes) : [],
+      sizeStock:       stockRows as { size: string; stock: number; sold: number }[],
+      suggestions_ids: row.suggestions_ids ? JSON.parse(row.suggestions_ids) : [],
+    };
   }));
+
+  return products;
 }
 
 export async function addProductAction(data: any) {
   const sizes = data.sizes?.length ? data.sizes : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const stockPerSize = data.stock || 10;
-  const productData = {
-    ...data,
-    sizes,
-    sizeStock: data.sizeStock || sizes.map((size: string) => ({ size, stock: stockPerSize, sold: 0 })),
-    suggestions_ids: data.suggestions_ids || [],
-  };
-  delete productData.stock;
-  await ProductModel.create(productData);
+
+  const [result]: any = await pool.execute(
+    'INSERT INTO products (name, description, price, image_url, category, sizes) VALUES (?, ?, ?, ?, ?, ?)',
+    [data.name, data.description, data.price, data.imageUrl || data.image_url, data.category, JSON.stringify(sizes)]
+  );
+
+  const productId = result.insertId;
+  for (const size of sizes) {
+    await pool.execute(
+      'INSERT INTO product_size_stock (product_id, size, stock) VALUES (?, ?, ?)',
+      [productId, size, stockPerSize]
+    );
+  }
+
   revalidatePath('/admin');
   revalidatePath('/');
   return { success: true };
 }
 
 export async function updateProductAction(id: string, data: any) {
-  if (data.stock && !data.sizeStock) {
-    const sizes = data.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-    data.sizeStock = sizes.map((size: string) => ({ size, stock: data.stock, sold: 0 }));
-    delete data.stock;
-  }
-  if (!data.sizes) data.sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  await ProductModel.findByIdAndUpdate(id, data);
+  await pool.execute(
+    'UPDATE products SET name=?, description=?, price=?, image_url=?, category=? WHERE id=?',
+    [data.name, data.description, data.price, data.imageUrl || data.image_url, data.category, id]
+  );
   revalidatePath('/admin');
   revalidatePath('/');
   return { success: true };
 }
 
 export async function deleteProductAction(id: string) {
-  await ProductModel.findByIdAndDelete(id);
+  await pool.execute('DELETE FROM products WHERE id=?', [id]);
   revalidatePath('/admin');
   revalidatePath('/');
   return { success: true };
@@ -96,14 +107,14 @@ export async function getAllOrdersAction() {
       'SELECT * FROM order_items WHERE order_id = ?', [row.id]
     );
     return {
-      id: row.id,
+      id:          row.id,
       orderNumber: row.order_number,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      total: parseFloat(row.total),
-      status: row.status,
-      createdAt: row.created_at,
-      items: items as any[],
+      userName:    row.user_name,
+      userEmail:   row.user_email,
+      total:       parseFloat(row.total),
+      status:      row.status,
+      createdAt:   row.created_at,
+      items:       items as any[],
     };
   }));
 
@@ -143,11 +154,11 @@ export async function getStatsAction() {
   `);
 
   return {
-    totalOrders: Number(totalOrders),
-    totalRevenue: parseFloat(totalRevenue),
-    totalUsers: Number(totalUsers),
+    totalOrders:   Number(totalOrders),
+    totalRevenue:  parseFloat(totalRevenue),
+    totalUsers:    Number(totalUsers),
     totalProducts: Number(totalProducts),
-    topProducts: topProducts as any[],
-    recentOrders: recentOrders as any[],
+    topProducts:   topProducts as any[],
+    recentOrders:  recentOrders as any[],
   };
 }

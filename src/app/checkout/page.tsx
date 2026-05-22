@@ -10,7 +10,7 @@ import { Loader2, CreditCard, ShieldCheck, Landmark, Wallet, QrCode, Building2, 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateInvoice } from '@/ai/flows/generate-invoice-flow';
-import { saveOrderAction, updateProductStockAction } from '@/app/api/users/actions';
+import { saveOrderAction, updateProductStockAction } from '@/lib/actions/auth';
 
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();

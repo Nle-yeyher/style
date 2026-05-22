@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getUserAction, getOrdersAction, updateUserAction, changePasswordAction } from '@/app/api/users/actions';
+import { getUserAction, getOrdersAction, updateUserAction, changePasswordAction } from '@/app/api/users/route';
 
 type OrderItem = {
   name: string;

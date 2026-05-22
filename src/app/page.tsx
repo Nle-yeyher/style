@@ -1,9 +1,18 @@
-import { Product } from '@/lib/types';
-import ProductModel from '@/lib/models/Product';
 import Link from 'next/link';
+import { Product } from '@/lib/types';
+
+async function getProducts(): Promise<Product[]> {
+  try {
+    const res = await fetch('http://localhost:3000/api/products', { cache: 'no-store' })
+    const json = await res.json()
+    return json.ok ? json.data : []
+  } catch {
+    return []
+  }
+}
 
 export default async function Home() {
-  const products: Product[] = await (await ProductModel.find({})).lean() as any[];
+  const products: Product[] = await getProducts()
 
   return (
     <div className="space-y-12">
@@ -39,7 +48,7 @@ export default async function Home() {
               href="/search"
               className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-8 py-4 text-sm font-bold text-slate-950 transition-all hover:bg-cyan-300 hover:shadow-lg"
             >
-              Explorar Productos
+              Explorar Productos ({products.length})
             </Link>
             <Link
               href="/collections"

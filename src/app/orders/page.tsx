@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { getOrdersAction } from '@/app/api/users/actions';
+import { getOrdersAction } from '@/app/api/users/route';
 
 export default function OrdersPage() {
   // Normally this would be a server-side fetch from the DB.
