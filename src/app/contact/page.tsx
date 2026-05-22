@@ -25,7 +25,7 @@ export default function ContactPage() {
               </span>
               <div>
                 <p className="font-semibold">Email</p>
-                <p className="text-muted-foreground">hola@stylesavvy.com</p>
+                <p className="text-muted-foreground">admin@stylesavvy.com</p>
               </div>
             </div>
 
@@ -35,7 +35,7 @@ export default function ContactPage() {
               </span>
               <div>
                 <p className="font-semibold">Teléfono</p>
-                <p className="text-muted-foreground">+57 300 123 4567</p>
+                <p className="text-muted-foreground">+57 311 387 4432</p>
               </div>
             </div>
 
@@ -45,7 +45,7 @@ export default function ContactPage() {
               </span>
               <div>
                 <p className="font-semibold">Ubicación</p>
-                <p className="text-muted-foreground">Carrera 15 # 123-45, Bogotá, Colombia</p>
+                <p className="text-muted-foreground">Quibdo, Colombia</p>
               </div>
             </div>
           </div>

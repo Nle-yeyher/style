@@ -5,23 +5,43 @@ import { useEffect, useState } from 'react';
 import { Order } from '@/lib/types';
 import { getOrders } from '@/lib/store';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
+import { buildInvoiceHtml, downloadInvoiceHtml } from '@/lib/invoice';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { getOrdersAction } from '@/app/api/users/route';
+
+async function getUserOrders(userId: string) {
+  const res = await fetch(`/api/orders?user_id=${encodeURIComponent(userId)}`)
+  const data = await res.json()
+  if (!data.ok) {
+    return { success: false, error: data.error || 'No se pudieron cargar las órdenes.' }
+  }
+  return { success: true, orders: data.data }
+}
 
 export default function OrdersPage() {
   // Normally this would be a server-side fetch from the DB.
   // We'll simulate some mock data if none exists for the demo.
   const [orders, setOrders] = useState<Order[]>([]);
+  const [customerName, setCustomerName] = useState('Cliente');
+  const [customerEmail, setCustomerEmail] = useState('cliente@stylesavvy.com');
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  const [selectedInvoiceHtml, setSelectedInvoiceHtml] = useState<string | null>(null);
+  const [selectedInvoiceOrderId, setSelectedInvoiceOrderId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedCustomer = sessionStorage.getItem('customerUser');
+    const storedEmail = sessionStorage.getItem('customerEmail');
+    if (storedCustomer) setCustomerName(storedCustomer);
+    if (storedEmail) setCustomerEmail(storedEmail);
     const loadOrders = async () => {
       if (typeof window === 'undefined') return;
 
       const userId = sessionStorage.getItem('userId');
       if (userId) {
-        const result = await getOrdersAction(userId);
+        const result = await getUserOrders(userId);
         if (result.success && result.orders) {
           setOrders(result.orders);
           return;
@@ -59,20 +79,31 @@ export default function OrdersPage() {
     loadOrders();
   }, []);
 
+  const handleViewInvoice = (order: Order) => {
+    const html = buildInvoiceHtml(order, customerName, customerEmail);
+    setSelectedInvoiceHtml(html);
+    setSelectedInvoiceOrderId(order.id);
+    setIsInvoiceOpen(true);
+  };
+
+  const handleDownloadInvoice = (order: Order) => {
+    downloadInvoiceHtml(order, customerName, customerEmail);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Order History</h1>
-        <p className="text-muted-foreground">Manage and track your recent styles.</p>
+        <h1 className="text-3xl font-bold font-headline">Historial de pedidos</h1>
+        <p className="text-muted-foreground">Gestiona y controla tus estilos recientes.</p>
       </div>
 
       <div className="space-y-6">
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
             <Package className="h-12 w-12 text-muted-foreground/30" />
-            <p className="text-muted-foreground">You haven't placed any orders yet.</p>
+            <p className="text-muted-foreground">Aún no has realizado ningún pedido.</p>
             <Button asChild variant="outline">
-              <Link href="/">Shop the Collection</Link>
+              <Link href="/">Explorar la colección</Link>
             </Button>
           </div>
         ) : (
@@ -110,9 +141,12 @@ export default function OrdersPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-6 flex justify-end">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    Order Details <ChevronRight className="h-4 w-4" />
+                <div className="mt-6 flex flex-wrap justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleViewInvoice(order)}>
+                    Ver factura
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => handleDownloadInvoice(order)}>
+                    Descargar factura
                   </Button>
                 </div>
               </CardContent>
@@ -120,6 +154,20 @@ export default function OrdersPage() {
           ))
         )}
       </div>
+      <Dialog open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
+        <DialogContent className="max-w-4xl rounded-3xl p-0">
+          <DialogHeader>
+            <DialogTitle>Factura {selectedInvoiceOrderId}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-auto max-h-[70vh] bg-slate-50 p-4">
+            {selectedInvoiceHtml ? (
+              <div dangerouslySetInnerHTML={{ __html: selectedInvoiceHtml }} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No se encontró la factura.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

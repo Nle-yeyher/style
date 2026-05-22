@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ShoppingBag, Search, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 
 export default function Navbar() {
   const { cart } = useCart();
+  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -36,6 +37,11 @@ export default function Navbar() {
     };
   }, []);
 
+  const isAdminRoute = pathname?.startsWith('/admin');
+  if (isAdminRoute) {
+    return null;
+  }
+
   const getInitials = (name: string) => {
     const parts = name.trim().split(' ').filter(Boolean);
     if (parts.length === 0) return '';
@@ -45,6 +51,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     if (typeof window === 'undefined') return;
+    sessionStorage.removeItem('adminUser');
     sessionStorage.removeItem('customerUser');
     sessionStorage.removeItem('customerEmail');
     sessionStorage.removeItem('userId');

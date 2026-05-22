@@ -170,23 +170,29 @@ export default function CheckoutPage() {
 
       const userId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') : null;
       if (userId) {
-        try {
-          await saveOrderAction(userId, {
-            orderNumber: orderData.id,
-            items: orderData.items,
-            total: orderData.total,
-            status: orderData.status,
-          });
+        const parsedUserId = Number(userId);
+        if (Number.isFinite(parsedUserId)) {
+          try {
+            await saveOrderAction({
+              user_id: parsedUserId,
+              items: orderData.items.map((item) => ({
+                product_id: Number(item.productId),
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                size: item.size || '',
+              })),
+              total: orderData.total,
+            });
 
-          await updateProductStockAction(
-            cart.map(item => ({
-              productId: item.id,
-              size: item.selectedSize,
-              quantity: item.quantity
-            }))
-          );
-        } catch (saveError) {
-          console.error('Error saving order to DB:', saveError);
+            for (const item of cart) {
+              await updateProductStockAction(Number(item.id), item.selectedSize || '', item.quantity);
+            }
+          } catch (saveError) {
+            console.error('Error saving order to DB:', saveError);
+          }
+        } else {
+          console.warn('ID de usuario inválido, pedido no guardado en DB');
         }
       } else {
         console.warn('Usuario no autenticado, pedido no guardado en DB');

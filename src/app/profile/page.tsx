@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getUserAction, getOrdersAction, updateUserAction, changePasswordAction } from '@/app/api/users/route';
+import { buildInvoiceHtml, downloadInvoiceHtml } from '@/lib/invoice';
 
 type OrderItem = {
   name: string;
@@ -29,6 +30,50 @@ type UserData = {
   email: string;
 };
 
+async function getUser(userId: string) {
+  const res = await fetch(`/api/users?user_id=${encodeURIComponent(userId)}`)
+  const data = await res.json()
+  if (!data.ok) {
+    return { success: false, error: data.error || 'No se pudo cargar el usuario.' }
+  }
+  return { success: true, user: data.data }
+}
+
+async function getOrders(userId: string) {
+  const res = await fetch(`/api/orders?user_id=${encodeURIComponent(userId)}`)
+  const data = await res.json()
+  if (!data.ok) {
+    return { success: false, error: data.error || 'No se pudieron cargar las órdenes.' }
+  }
+  return { success: true, orders: data.data }
+}
+
+async function updateUser(userId: string, payload: { name: string }) {
+  const res = await fetch('/api/users', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: userId, ...payload }),
+  })
+  const data = await res.json()
+  if (!data.ok) {
+    return { success: false, error: data.error || 'Error al actualizar el perfil.' }
+  }
+  return { success: true, user: data.user }
+}
+
+async function changePassword(userId: string, currentPassword: string, newPassword: string) {
+  const res = await fetch('/api/users', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: userId, currentPassword, newPassword }),
+  })
+  const data = await res.json()
+  if (!data.ok) {
+    return { success: false, error: data.error || 'Error al cambiar la contraseña.' }
+  }
+  return { success: true }
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserData | null>(null);
@@ -40,6 +85,9 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  const [selectedInvoiceHtml, setSelectedInvoiceHtml] = useState<string | null>(null);
+  const [selectedInvoiceOrderId, setSelectedInvoiceOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -52,7 +100,8 @@ export default function ProfilePage() {
 
     const loadProfile = async () => {
       setError(null);
-      const userResult = await getUserAction(userId);
+
+      const userResult = await getUser(userId);
       if (!userResult.success) {
         setError(userResult.error || 'No se pudo cargar el perfil.');
         return;
@@ -63,7 +112,7 @@ export default function ProfilePage() {
         setName(userResult.user.name);
       }
 
-      const ordersResult = await getOrdersAction(userId);
+      const ordersResult = await getOrders(userId);
       if (ordersResult.success) {
         setOrders(ordersResult.orders);
       }
@@ -90,7 +139,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const result = await updateUserAction(user.id, { name: name.trim() });
+    const result = await updateUser(user.id, { name: name.trim() });
     if (!result.success) {
       setError(result.error || 'Error al actualizar perfil.');
       setLoading(false);
@@ -126,7 +175,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const result = await changePasswordAction(user.id, currentPassword, newPassword);
+    const result = await changePassword(user.id, currentPassword, newPassword);
     if (!result.success) {
       setError(result.error || 'Error al cambiar la contraseña.');
       setLoading(false);
@@ -138,6 +187,20 @@ export default function ProfilePage() {
     setConfirmPassword('');
     setMessage('Contraseña actualizada con éxito.');
     setLoading(false);
+  };
+
+  const getCustomerName = () => user?.name || 'Cliente';
+  const getCustomerEmail = () => user?.email || 'cliente@stylesavvy.com';
+
+  const handleViewInvoice = (order: Order) => {
+    const html = buildInvoiceHtml(order, getCustomerName(), getCustomerEmail());
+    setSelectedInvoiceHtml(html);
+    setSelectedInvoiceOrderId(order.id);
+    setIsInvoiceOpen(true);
+  };
+
+  const handleDownloadInvoice = (order: Order) => {
+    downloadInvoiceHtml(order, getCustomerName(), getCustomerEmail());
   };
 
   if (!user) {
@@ -230,6 +293,14 @@ export default function ProfilePage() {
                           </div>
                         ))}
                       </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleViewInvoice(order)}>
+                          Ver factura
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleDownloadInvoice(order)}>
+                          Descargar factura
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -238,6 +309,20 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
+      <Dialog open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
+        <DialogContent className="max-w-4xl rounded-3xl p-0">
+          <DialogHeader>
+            <DialogTitle>Factura {selectedInvoiceOrderId}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-auto max-h-[70vh] bg-slate-50 p-4">
+            {selectedInvoiceHtml ? (
+              <div dangerouslySetInnerHTML={{ __html: selectedInvoiceHtml }} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No se encontró la factura.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,8 +21,7 @@ async function loginUserAction(email: string, password: string) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') ?? '/';
+  const [redirectTo, setRedirectTo] = useState('/');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,6 +33,8 @@ export default function LoginPage() {
     if (typeof window === 'undefined') return;
     const storedCustomer = sessionStorage.getItem('customerUser');
     setCustomerUser(storedCustomer);
+    const params = new URLSearchParams(window.location.search);
+    setRedirectTo(params.get('redirect') ?? '/');
   }, []);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -70,6 +71,7 @@ export default function LoginPage() {
         sessionStorage.removeItem('customerUser');
         sessionStorage.removeItem('customerEmail');
         sessionStorage.removeItem('userId');
+        window.dispatchEvent(new Event('stylesavvy-auth-change'));
       }
       router.push('/admin');
     } else {

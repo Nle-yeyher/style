@@ -3,15 +3,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, Mail, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export default function CheckoutSuccessPage() {
-  const searchParams = useSearchParams();
-  const orderNumber = searchParams.get('order');
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [email, setEmail] = useState<string>('');
   const [invoice, setInvoice] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +17,10 @@ export default function CheckoutSuccessPage() {
   useEffect(() => {
     const savedEmail = sessionStorage.getItem('customer_email');
     const savedInvoice = sessionStorage.getItem('last_invoice');
-    
+
+    const params = new URLSearchParams(window.location.search);
+    setOrderNumber(params.get('order'));
+
     if (savedEmail) setEmail(savedEmail);
     if (savedInvoice) setInvoice(JSON.parse(savedInvoice));
   }, []);
