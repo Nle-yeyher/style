@@ -115,7 +115,7 @@ export default function OrdersPage() {
                   <p className="text-sm text-foreground/80">{new Date(order.date).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-primary">${order.total.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-primary">${parseFloat(order.total).toLocaleString('es-CO')}</p>
                   <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-[10px] font-bold text-green-700 uppercase">
                     {order.status}
                   </span>
