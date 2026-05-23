@@ -67,23 +67,47 @@ export default function AdminDashboard() {
 
   const loadProducts = useCallback(() => {
     setProductsLoading(true);
-    getProductsAction().then(setProducts).finally(() => setProductsLoading(false));
-  }, []);
+    getProductsAction()
+      .then(setProducts)
+      .catch(() => {
+        setProducts([]);
+        toast({ variant: 'destructive', title: 'Servicio de productos no disponible' });
+      })
+      .finally(() => setProductsLoading(false));
+  }, [toast]);
 
   const loadOrders = useCallback(() => {
     setOrdersLoading(true);
-    getAllOrdersAction().then(setOrders).finally(() => setOrdersLoading(false));
-  }, []);
+    getAllOrdersAction()
+      .then(setOrders)
+      .catch(() => {
+        setOrders([]);
+        toast({ variant: 'destructive', title: 'Servicio de pedidos no disponible' });
+      })
+      .finally(() => setOrdersLoading(false));
+  }, [toast]);
 
   const loadUsers = useCallback(() => {
     setUsersLoading(true);
-    getUsersAction().then(setUsers).finally(() => setUsersLoading(false));
-  }, []);
+    getUsersAction()
+      .then(setUsers)
+      .catch(() => {
+        setUsers([]);
+        toast({ variant: 'destructive', title: 'Servicio de usuarios no disponible' });
+      })
+      .finally(() => setUsersLoading(false));
+  }, [toast]);
 
   const loadStats = useCallback(() => {
     setStatsLoading(true);
-    getStatsAction().then(setStats).finally(() => setStatsLoading(false));
-  }, []);
+    getStatsAction()
+      .then(setStats)
+      .catch(() => {
+        setStats(null);
+        toast({ variant: 'destructive', title: 'Servicio de estadísticas no disponible' });
+      })
+      .finally(() => setStatsLoading(false));
+  }, [toast]);
 
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const filteredProducts = normalizedSearch
@@ -136,10 +160,13 @@ export default function AdminDashboard() {
     router.push('/');
   };
 
-  // ── Producto form ────────────────────────────────────────────
   const openNewProduct = () => {
     setEditingProduct(null);
-    setSizeStockEdit([{ size: 'XS', stock: 10, sold: 0 }, { size: 'S', stock: 10, sold: 0 }, { size: 'M', stock: 10, sold: 0 }, { size: 'L', stock: 10, sold: 0 }, { size: 'XL', stock: 10, sold: 0 }, { size: 'XXL', stock: 10, sold: 0 }]);
+    setSizeStockEdit([
+      { size: 'XS', stock: 10, sold: 0 }, { size: 'S', stock: 10, sold: 0 },
+      { size: 'M', stock: 10, sold: 0 },  { size: 'L', stock: 10, sold: 0 },
+      { size: 'XL', stock: 10, sold: 0 }, { size: 'XXL', stock: 10, sold: 0 },
+    ]);
     setIsDialogOpen(true);
   };
 
@@ -151,9 +178,7 @@ export default function AdminDashboard() {
 
   const handleCategoryChange = (category: string) => {
     const preset = SIZES_PRESETS[category];
-    if (preset) {
-      setSizeStockEdit(preset.map(size => ({ size, stock: 10, sold: 0 })));
-    }
+    if (preset) setSizeStockEdit(preset.map(size => ({ size, stock: 10, sold: 0 })));
   };
 
   const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -161,46 +186,45 @@ export default function AdminDashboard() {
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const productData = {
-      name: formData.get('name') as string,
-      category: formData.get('category') as string,
-      price: parseFloat(formData.get('price') as string),
-      description: formData.get('description') as string,
-      imageUrl: formData.get('imageUrl') as string || 'https://picsum.photos/seed/new/600/800',
-      sizes: sizeStockEdit.map(s => s.size),
-      sizeStock: sizeStockEdit,
+      name:            formData.get('name') as string,
+      category:        formData.get('category') as string,
+      price:           parseFloat(formData.get('price') as string),
+      description:     formData.get('description') as string,
+      imageUrl:        formData.get('imageUrl') as string || 'https://picsum.photos/seed/new/600/800',
+      sizes:           sizeStockEdit.map(s => s.size),
+      sizeStock:       sizeStockEdit,
       suggestions_ids: editingProduct?.suggestions_ids || [],
     };
 
     try {
       if (editingProduct?.id) {
         await updateProductAction(String(editingProduct.id), productData);
-        toast({ title: "Producto actualizado" });
+        toast({ title: 'Producto actualizado' });
       } else {
         await addProductAction(productData);
-        toast({ title: "Producto creado" });
+        toast({ title: 'Producto creado' });
       }
       setIsDialogOpen(false);
       setEditingProduct(null);
       loadProducts();
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'No se pudo guardar el producto.' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteProduct = async (id: any) => {
-    if (!confirm("¿Eliminar este producto?")) return;
+    if (!confirm('¿Eliminar este producto?')) return;
     try {
       await deleteProductAction(String(id));
-      toast({ title: "Producto eliminado" });
+      toast({ title: 'Producto eliminado' });
       loadProducts();
     } catch {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar." });
+      toast({ variant: 'destructive', title: 'Error', description: 'No se pudo eliminar.' });
     }
   };
 
-  // ── Auth check ───────────────────────────────────────────────
   if (!isAuthChecked) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
@@ -217,12 +241,11 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── Sidebar items ─────────────────────────────────────────────
   const sidebarItems: { id: Tab; label: string; icon: any }[] = [
-    { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Inicio',     icon: LayoutDashboard },
     { id: 'products',  label: 'Inventario', icon: Package },
-    { id: 'orders',    label: 'Pedidos', icon: ShoppingCart },
-    { id: 'users',     label: 'Usuarios', icon: Users },
+    { id: 'orders',    label: 'Pedidos',    icon: ShoppingCart },
+    { id: 'users',     label: 'Usuarios',   icon: Users },
   ];
 
   return (
@@ -296,25 +319,25 @@ export default function AdminDashboard() {
                     className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm shadow-sm focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-100"
                   />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" size="sm" onClick={handleLogout} className="ml-2 flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    Cerrar Sesión
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" onClick={handleLogout} className="ml-2 flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Cerrar Sesión
+                </Button>
               </div>
             </div>
           </div>
 
           <div className="px-6 py-6 max-w-[1800px] mx-auto">
+
+            {/* ── DASHBOARD ── */}
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   {[
-                    { title: 'Ventas Totales', value: `$${stats?.totalRevenue.toLocaleString('es-CO') ?? '0'}`, description: 'Ingresos acumulados' },
-                    { title: 'Pedidos', value: stats?.totalOrders ?? 0, description: 'Pedidos procesados' },
-                    { title: 'Clientes', value: stats?.totalUsers ?? 0, description: 'Clientes registrados' },
-                    { title: 'Productos', value: stats?.totalProducts ?? 0, description: 'Productos en catálogo' },
+                    { title: 'Ventas Totales', value: `$${stats?.totalRevenue?.toLocaleString('es-CO') ?? '0'}`, description: 'Ingresos acumulados' },
+                    { title: 'Pedidos',        value: stats?.totalOrders ?? 0,   description: 'Pedidos procesados' },
+                    { title: 'Clientes',       value: stats?.totalUsers ?? 0,    description: 'Clientes registrados' },
+                    { title: 'Productos',      value: stats?.totalProducts ?? 0, description: 'Productos en catálogo' },
                   ].map((card) => (
                     <Card key={card.title} className="overflow-hidden border-none shadow-sm min-h-[160px]">
                       <CardContent className="space-y-3 p-5">
@@ -333,17 +356,13 @@ export default function AdminDashboard() {
 
                 <div className="mt-6 grid gap-4 lg:grid-cols-2">
                   <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Rotación de Inventario</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-base font-semibold">Rotación de Inventario</CardTitle></CardHeader>
                     <CardContent className="text-sm text-slate-500">
                       Un panorama rápido de cómo se mueve el stock. Aquí visualizas tendencias de ventas y prioridades para reabastecer.
                     </CardContent>
                   </Card>
                   <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Pronóstico de Demanda</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-base font-semibold">Pronóstico de Demanda</CardTitle></CardHeader>
                     <CardContent className="text-sm text-slate-500">
                       Proyección de la demanda para tus colecciones principales y recomendaciones de stock.
                     </CardContent>
@@ -352,9 +371,7 @@ export default function AdminDashboard() {
 
                 <div className="mt-6 grid gap-4 lg:grid-cols-2">
                   <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Productos más vendidos</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-base font-semibold">Productos más vendidos</CardTitle></CardHeader>
                     <CardContent>
                       {stats?.topProducts?.length ? (
                         <div className="space-y-3">
@@ -375,9 +392,7 @@ export default function AdminDashboard() {
                   </Card>
 
                   <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Pedidos recientes</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-base font-semibold">Pedidos recientes</CardTitle></CardHeader>
                     <CardContent>
                       {stats?.recentOrders?.length ? (
                         <div className="space-y-3">
@@ -406,6 +421,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* ── PRODUCTOS ── */}
             {activeTab === 'products' && (
               <div className="mt-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -487,7 +503,7 @@ export default function AdminDashboard() {
                       </TableHeader>
                       <TableBody>
                         {filteredProducts.map((product) => {
-                          const totalStock = product.sizeStock?.reduce((sum: number, stockItem: any) => sum + stockItem.stock, 0) || 0;
+                          const totalStock = product.sizeStock?.reduce((sum: number, s: any) => sum + s.stock, 0) || 0;
                           return (
                             <TableRow key={product.id}>
                               <TableCell className="font-mono text-sm text-slate-600">{product.id}</TableCell>
@@ -521,6 +537,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* ── PEDIDOS ── */}
             {activeTab === 'orders' && (
               <div className="mt-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -585,6 +602,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* ── USUARIOS ── */}
             {activeTab === 'users' && (
               <div className="mt-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -656,6 +674,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+
           </div>
         </main>
       </div>

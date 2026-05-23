@@ -3,7 +3,11 @@ import { Product } from '@/lib/types';
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('http://localhost:3000/api/products', { cache: 'no-store' })
+    const res = await fetch('http://localhost:3000/api/products', {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000)
+    })
+    if (!res.ok) return []
     const json = await res.json()
     return json.ok ? json.data : []
   } catch {
@@ -48,7 +52,9 @@ export default async function Home() {
               href="/search"
               className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-8 py-4 text-sm font-bold text-slate-950 transition-all hover:bg-cyan-300 hover:shadow-lg"
             >
-              Explorar Productos ({products.length})
+              {products.length > 0
+                ? `Explorar Productos (${products.length})`
+                : 'Explorar Productos'}
             </Link>
             <Link
               href="/collections"
@@ -56,6 +62,11 @@ export default async function Home() {
             >
               Ver Colecciones
             </Link>
+            {products.length === 0 && (
+              <p className="text-sm text-cyan-200/70 mt-2 w-full">
+                Catálogo no disponible en este momento.
+              </p>
+            )}
           </div>
         </div>
       </section>

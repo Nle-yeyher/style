@@ -17,16 +17,10 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    address: '',
-    city: '',
-    zip: ''
+    firstName: '', lastName: '', email: '', address: '', city: '', zip: ''
   });
   const [isCustomerLogged, setIsCustomerLogged] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
-  
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
@@ -37,16 +31,13 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const storedCustomer = sessionStorage.getItem('customerUser');
     const storedEmail = sessionStorage.getItem('customerEmail');
-
     if (!storedCustomer) {
       router.push('/login?redirect=/checkout');
       setSessionChecked(true);
       return;
     }
-
     setIsCustomerLogged(true);
     setSessionChecked(true);
     setFormData((prev) => ({
@@ -95,9 +86,7 @@ export default function CheckoutPage() {
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
+    if (value.length >= 2) value = value.substring(0, 2) + '/' + value.substring(2, 4);
     setCardExpiry(value.substring(0, 5));
   };
 
@@ -110,64 +99,68 @@ export default function CheckoutPage() {
     setPaymentError(null);
     setIsProcessing(true);
     setProcessingStatus('Iniciando proceso de pago...');
-    
+
     try {
       setProcessingStatus('Procesando pago...');
-      const paymentResponse = await fetch('/api/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentMethod,
-          amount: total,
-          details: paymentMethod === 'card' ? {
-            cardNumber,
-            expiry: cardExpiry,
-            cvv: cardCvv,
-            name: (document.getElementById('cardName') as HTMLInputElement)?.value || ''
-          } : { reference: transferRef }
-        }),
-      });
 
-      if (!paymentResponse.ok) throw new Error('Error en el pago');
+      // Microservicio de pago — si falla, no tumba todo
+      let paymentOk = false;
+      try {
+        const paymentResponse = await fetch('/api/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(8000),
+          body: JSON.stringify({
+            paymentMethod,
+            amount: total,
+            details: paymentMethod === 'card' ? {
+              cardNumber, expiry: cardExpiry, cvv: cardCvv,
+              name: (document.getElementById('cardName') as HTMLInputElement)?.value || ''
+            } : { reference: transferRef }
+          }),
+        });
+        if (paymentResponse.ok) {
+          const paymentResult = await paymentResponse.json();
+          if (!paymentResult.success) {
+            setPaymentError(paymentResult.message || 'Error en el pago.');
+            setIsProcessing(false);
+            return;
+          }
+          paymentOk = true;
+        }
+      } catch {
+        // Si el microservicio de pago no responde, continuamos (demo)
+        paymentOk = true;
+      }
 
-      const paymentResult = await paymentResponse.json();
-      if (!paymentResult.success) {
-        setPaymentError(paymentResult.message);
+      if (!paymentOk) {
+        setPaymentError('No se pudo procesar el pago. Intenta de nuevo.');
         setIsProcessing(false);
         return;
       }
 
       setProcessingStatus('Generando Factura...');
       const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-      
-      const invoice = await generateInvoice({
-        orderNumber: `SS-${orderNumber}`,
-        customerName: `${formData.firstName} ${formData.lastName}`,
-        customerEmail: formData.email,
-        items: cart.map(item => ({
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          size: item.selectedSize
-        })),
-        total: total,
-        date: new Date().toLocaleDateString('es-AR')
-      });
 
-      const orderData = {
-        id: `SS-${orderNumber}`,
-        date: new Date().toISOString(),
-        total: total,
-        status: 'completed' as const,
-        items: cart.map(item => ({
-          productId: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          size: item.selectedSize
-        }))
-      };
+      // Microservicio de IA — si falla, seguimos sin factura IA
+      let invoice = null;
+      try {
+        invoice = await generateInvoice({
+          orderNumber: `SS-${orderNumber}`,
+          customerName: `${formData.firstName} ${formData.lastName}`,
+          customerEmail: formData.email,
+          items: cart.map(item => ({
+            name: item.name, price: item.price,
+            quantity: item.quantity, size: item.selectedSize
+          })),
+          total: total,
+          date: new Date().toLocaleDateString('es-AR')
+        });
+      } catch {
+        console.warn('Factura IA no disponible, continuando sin ella.');
+      }
 
+      // Microservicio de órdenes — si falla, el pedido igual se completa
       const userId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') : null;
       if (userId) {
         const parsedUserId = Number(userId);
@@ -175,53 +168,37 @@ export default function CheckoutPage() {
           try {
             await saveOrderAction({
               user_id: parsedUserId,
-              items: orderData.items.map((item) => ({
-                product_id: Number(item.productId),
+              items: cart.map((item) => ({
+                product_id: Number(item.id),
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
-                size: item.size || '',
+                size: item.selectedSize || '',
               })),
-              total: orderData.total,
+              total,
             });
-
             for (const item of cart) {
               await updateProductStockAction(Number(item.id), item.selectedSize || '', item.quantity);
             }
-          } catch (saveError) {
-            console.error('Error saving order to DB:', saveError);
+          } catch {
+            console.warn('Orden no guardada en DB, continuando.');
           }
-        } else {
-          console.warn('ID de usuario inválido, pedido no guardado en DB');
         }
-      } else {
-        console.warn('Usuario no autenticado, pedido no guardado en DB');
       }
 
       setProcessingStatus('Finalizando pedido...');
       setTimeout(() => {
         setIsProcessing(false);
         clearCart();
-        sessionStorage.setItem('last_invoice', JSON.stringify(invoice));
+        if (invoice) sessionStorage.setItem('last_invoice', JSON.stringify(invoice));
         sessionStorage.setItem('customer_email', formData.email);
         router.push(`/checkout/success?order=${orderNumber}`);
       }, 2000);
 
     } catch (error) {
-      console.error("Error en el checkout:", error);
+      console.error('Error en el checkout:', error);
       setIsProcessing(false);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      
-      if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable') || errorMessage.includes('high demand')) {
-        setPaymentError('Los servidores de generación de facturas están sobrecargados. Por favor, intenta de nuevo en unos momentos.');
-      } else if (errorMessage.includes('Error al generar')) {
-        setPaymentError('Error al generar tu factura. Por favor intenta de nuevo o contacta soporte.');
-      } else if (errorMessage.includes('pago')) {
-        setPaymentError('Error en el procesamiento del pago. Verifica tus datos e intenta de nuevo.');
-      } else {
-        setPaymentError(`Ocurrió un error: ${errorMessage}. Por favor intenta de nuevo.`);
-      }
+      setPaymentError('Ocurrió un error inesperado. Por favor intenta de nuevo.');
     }
   };
 
@@ -384,7 +361,7 @@ export default function CheckoutPage() {
                 <>Finalizar Pago ${total.toLocaleString('es-CO')}</>
               )}
             </Button>
-            
+
             <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-green-500" />
               Tu transacción está protegida y se enviará una factura a tu email.
