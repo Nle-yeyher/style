@@ -10,8 +10,9 @@ export async function GET(req: NextRequest) {
     let query = `
       SELECT o.*, u.name as user_name, u.email as user_email,
         GROUP_CONCAT(
-          CONCAT(oi.name, ':', oi.quantity, ':', oi.price, ':', oi.size)
+          CONCAT(oi.name, '||', oi.quantity, '||', oi.price, '||', IFNULL(oi.size, ''))
           ORDER BY oi.id
+          SEPARATOR ';;'
         ) as items_raw
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
@@ -30,10 +31,16 @@ export async function GET(req: NextRequest) {
 
     const data = rows.map((row: any) => ({
       ...row,
+      total: Number(row.total),
       items: row.items_raw
-        ? row.items_raw.split(',').map((entry: string) => {
-            const [name, quantity, price, size] = entry.split(':')
-            return { name, quantity: Number(quantity), price: Number(price), size }
+        ? row.items_raw.split(';;').map((entry: string) => {
+            const [name, quantity, price, size] = entry.split('||')
+            return {
+              name,
+              quantity: Number(quantity),
+              price: Number(price),
+              size: size || undefined,
+            }
           })
         : [],
       items_raw: undefined,
@@ -52,7 +59,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { user_id, items, total } = body
 
-    // Generar número de orden único
     const order_number = `ORD-${Date.now()}`
 
     const [result]: any = await pool.execute(
@@ -62,14 +68,12 @@ export async function POST(req: NextRequest) {
 
     const orderId = result.insertId
 
-    // Insertar cada item de la orden
     for (const item of items) {
       await pool.execute(
         'INSERT INTO order_items (order_id, product_id, name, price, quantity, size) VALUES (?, ?, ?, ?, ?, ?)',
         [orderId, item.product_id, item.name, item.price, item.quantity, item.size]
       )
 
-      // Actualizar stock: restar quantity y sumar sold
       await pool.execute(
         'UPDATE product_size_stock SET stock = stock - ?, sold = sold + ? WHERE product_id = ? AND size = ?',
         [item.quantity, item.quantity, item.product_id, item.size]
