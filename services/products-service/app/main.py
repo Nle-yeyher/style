@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.routers.orders import router
+from app.routers.products import router
 from app.db import get_pool, close_pool
 
 @asynccontextmanager
@@ -10,11 +10,11 @@ async def lifespan(app: FastAPI):
     yield
     await close_pool()
 
-app = FastAPI(title="Orders Service", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Products Service", version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"],
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "orders", "port": 8001}
+    return {"status": "ok", "service": "products", "port": 8002}
