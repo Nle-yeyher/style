@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Product } from '@/lib/types';
-
+ 
 async function getProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('http://localhost:3000/api/products', {
+    const res = await fetch(`${process.env.PRODUCTS_SERVICE_URL}/products`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(5000)
     })
@@ -14,10 +14,10 @@ async function getProducts(): Promise<Product[]> {
     return []
   }
 }
-
+ 
 export default async function Home() {
   const products: Product[] = await getProducts()
-
+ 
   return (
     <div className="space-y-12">
       <section
@@ -33,7 +33,7 @@ export default async function Home() {
           <div className="absolute -top-32 -right-32 h-80 w-80 rounded-full bg-cyan-400 blur-3xl" />
           <div className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-fuchsia-500/50 blur-3xl" />
         </div>
-
+ 
         <div className="container relative z-10 px-6 max-w-4xl mx-auto">
           <div className="space-y-6">
             <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">
@@ -46,35 +46,22 @@ export default async function Home() {
               Encuentra piezas seleccionadas cuidadosamente, desde prendas esenciales hasta accesorios que elevan cualquier look.
             </p>
           </div>
-
+ 
           <div className="mt-12 flex flex-wrap gap-4">
-            <Link
-              href="/search"
-              className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-8 py-4 text-sm font-bold text-slate-950 transition-all hover:bg-cyan-300 hover:shadow-lg"
-            >
-              {products.length > 0
-                ? `Explorar Productos (${products.length})`
-                : 'Explorar Productos'}
-            </Link>
             <Link
               href="/collections"
               className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/20"
             >
               Ver Colecciones
             </Link>
-            {products.length === 0 && (
-              <p className="text-sm text-cyan-200/70 mt-2 w-full">
-                Catálogo no disponible en este momento.
-              </p>
-            )}
           </div>
         </div>
       </section>
-
+ 
       <section className="relative overflow-hidden rounded-3xl bg-slate-950/95 px-6 py-20 shadow-2xl">
         <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 translate-x-16 -translate-y-16 rounded-full bg-cyan-400/20 blur-3xl" />
         <div className="pointer-events-none absolute left-0 bottom-0 h-72 w-72 -translate-x-16 translate-y-16 rounded-full bg-purple-500/20 blur-3xl" />
-
+ 
         <div className="container relative mx-auto grid gap-10 lg:grid-cols-[1.4fr_0.8fr] items-center px-4">
           <div className="space-y-6 text-slate-100">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/90">Promoción exclusiva</p>
@@ -84,7 +71,7 @@ export default async function Home() {
             <p className="max-w-2xl text-slate-300/90 leading-relaxed">
               Sé el primero en enterarte de nuevos lanzamientos, descuentos exclusivos y tendencias en ropa, zapatos y accesorios.
             </p>
-
+ 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl shadow-2xl shadow-slate-950/20">
                 <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Envío rápido</p>
@@ -96,7 +83,7 @@ export default async function Home() {
               </div>
             </div>
           </div>
-
+ 
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/90 p-8 shadow-2xl shadow-slate-950/30 backdrop-blur-xl">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-200/80">Boletín de moda</p>
             <h3 className="mt-4 text-2xl font-bold text-white">Recibe inspiración y ofertas exclusivas</h3>
