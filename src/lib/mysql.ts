@@ -5,17 +5,15 @@ const pool = mysql.createPool({
   user: process.env.MYSQL_USER || 'root',
   password: process.env.MYSQL_PASSWORD || '',
   database: process.env.MYSQL_DATABASE || 'style_db',
-  port: 3306,
+  port: parseInt(process.env.MYSQL_PORT || '3306'), // ← aquí el cambio
   waitForConnections: true,
-  connectionLimit: 5,      // ← máximo 5 conexiones
+  connectionLimit: 5,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
 });
 
-// Compatibilidad con el patrón dbConnect() de Mongoose
 export async function dbConnect() {
-  // El pool se conecta automáticamente, esto solo verifica la conexión
   const conn = await pool.getConnection();
   conn.release();
 }
